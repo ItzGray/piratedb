@@ -1,4 +1,4 @@
-# wizdb
+# piratedb
 
 Builds an SQLite database of items directly from game files.
 
@@ -8,26 +8,24 @@ Install Katsuba through PyPi
 pip install katsuba
 ```
 
-Head over to the [wiztype repository](https://github.com/wizspoil/wiztype)
+Head over to the [arrtype repository](https://github.com/wizspoil/arrtype)
 and follow README instructions to dump a types JSON from the game client.
 
 Then execute the following commands:
 
 ```
-# Clone this repository to wizdb/
-git clone https://github.com/MajorPain1/wizdb
-cd wizdb
+# Clone this repository to piratedb/
+git clone https://github.com/ItzGray/piratedb
+cd piratedb
 
 ...
-# Copy the game's Root.wad file to wizdb/Root.wad
+# Copy the game's Root.wad file to piratedb/Root.wad
 
-# Find a copy of mobdeckbehaviortypes.json from the WizSpoil discord and copy to wizdb/mobdeckbehaviortypes.json
-
-# Copy previously dumped wiztype file to wizdb/types.json
+# Copy previously dumped arrtype file to piratedb/types.json
 ...
 
 # Now build the db
-python -m wizdb
+python -m piratedb
 
-# You will see the database file wizdb/items.db on success.
+# You will see the database file piratedb/items.db on success.
 ```
