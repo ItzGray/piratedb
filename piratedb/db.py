@@ -16,6 +16,8 @@ CREATE TABLE items (
     real_name          text,
     image              text,
 
+    item_type          text,
+    item_flags         integer,
     equip_school       integer,
     equip_level        integer,
     equip_talent       integer,
@@ -62,7 +64,7 @@ CREATE TABLE talents (
 );
 
 
-CREATE TABLE talent_descriptions (
+CREATE TABLE talent_ranks (
     id              integer not null primary key,
     talent          integer not null,
 
@@ -74,7 +76,7 @@ CREATE TABLE talent_descriptions (
     foreign key(description)    references locale_en(id)
 );
 
-CREATE INDEX talent_desc_lookup ON talent_descriptions(talent);
+CREATE INDEX talent_rank_lookup ON talent_ranks(talent);
 
 
 CREATE TABLE units (
@@ -84,6 +86,12 @@ CREATE TABLE units (
     image               text,
     title               integer,
     school              text,
+    attack_type         text,
+    dmg_type            text,
+    primary_stat        text,
+    beast_flag          integer,
+    undead_flag         integer,
+    bird_flag           integer,
 
     foreign key(name)   references locale_en(id)
     foreign key(title)  references locale_en(id)
@@ -164,18 +172,6 @@ CREATE INDEX pet_power_lookup ON pet_powers(pet);
 """
 
 
-def convert_stat(stat):
-    match stat.kind:
-        case 1: return 1, stat.category, stat.value
-        case 2: return 2, stat.pips, stat.power_pips
-        case 3: return 3, stat.spell, stat.count
-        case 4: return 4, stat.spell, stat.desc_key.id
-        case 5: return 5, stat.multiplier, 0
-        case 6: return 6, stat.count, 0
-
-        case _: raise RuntimeError()
-
-
 def _progress(_status, remaining, total):
     print(f'Copied {total-remaining} of {total} pages...')
 
@@ -220,6 +216,8 @@ def insert_items(cursor, items):
             item.name.id,
             item.real_name,
             item.image,
+            item.item_type,
+            item.item_flags,
             item.school_req,
             item.level_req,
             item.talent_req,
@@ -271,7 +269,7 @@ def insert_items(cursor, items):
             ))
     
     cursor.executemany(
-        """INSERT INTO items(id,name,real_name,image,equip_school,equip_level,equip_talent,equip_talent_rank) VALUES (?,?,?,?,?,?,?,?)""",
+        """INSERT INTO items(id,name,real_name,image,item_type,item_flags,equip_school,equip_level,equip_talent,equip_talent_rank) VALUES (?,?,?,?,?,?,?,?,?,?)""",
         values
     )
     cursor.executemany(
@@ -291,7 +289,13 @@ def insert_units(cursor, units):
             unit.real_name,
             unit.image,
             unit.suffix.id,
-            unit.school
+            unit.school,
+            unit.attack_type,
+            unit.damage_type,
+            unit.primary_stat,
+            unit.beast,
+            unit.undead,
+            unit.bird
         ))
 
         for stat in range(len(unit.stat_modifiers)):
@@ -321,7 +325,7 @@ def insert_units(cursor, units):
             ))
 
     cursor.executemany(
-        "INSERT INTO units(id,name,real_name,image,title,school) VALUES (?,?,?,?,?,?)",
+        "INSERT INTO units(id,name,real_name,image,title,school,attack_type,dmg_type,primary_stat,beast_flag,undead_flag,bird_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(
@@ -407,7 +411,7 @@ def insert_talents(cursor, talents):
         values
     )
     cursor.executemany(
-        """INSERT INTO talent_descriptions(talent,rank,description,level_req_unit) VALUES (?,?,?,?)""",
+        """INSERT INTO talent_ranks(talent,rank,description,level_req_unit) VALUES (?,?,?,?)""",
         descriptions
     )
 
