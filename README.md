@@ -29,6 +29,3 @@ python -m piratedb
 
 # You will see the database file piratedb/items.db on success.
 ```
-
-## Notes
-This is not fully finished, but I figured I'd drop it on here now anyway. Please forgive my crappy code.
