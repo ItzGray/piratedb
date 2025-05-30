@@ -96,7 +96,7 @@ MODIFIER_OPERATORS = {0: "Set", 1: "Set Add", 2: "Power", 3: "Multiply Add", 4: 
 
 ROOT = Path(__file__).parent.parent
 ROOT_WAD = ROOT / "Root.wad"
-TYPES = ROOT / "typefile.json"
+TYPES = ROOT / "types.json"
 
 de = BinDeserializer(ROOT_WAD, TYPES)
 MANIFEST = de.deserialize_from_path("TemplateManifest.xml")
