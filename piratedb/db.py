@@ -141,6 +141,7 @@ CREATE TABLE pets (
     guile           integer,
     grit            integer,
     hp              integer,
+    item_flags      integer,
 
     foreign key(name)   references locale_en(id)
 );
@@ -356,7 +357,8 @@ def insert_pets(cursor, pets):
             pet.max_guts,
             pet.max_guile,
             pet.max_grit,
-            pet.max_hp
+            pet.max_hp,
+            pet.item_flags
         ))
 
         for talent in pet.base_talents:
@@ -372,7 +374,7 @@ def insert_pets(cursor, pets):
             ))
     
     cursor.executemany(
-        "INSERT INTO pets(id,name,real_name,image,strength,agility,will,power,guts,guile,grit,hp) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO pets(id,name,real_name,image,strength,agility,will,power,guts,guile,grit,hp,item_flags) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(
