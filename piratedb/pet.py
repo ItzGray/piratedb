@@ -32,6 +32,7 @@ class Pet:
             self.image = ""
         behaviors = obj["m_behaviors"]
         pet_behavior = None
+        item_behavior = None
 
         for behavior in behaviors:
             if behavior == None:
@@ -40,6 +41,9 @@ class Pet:
             match behavior["m_behaviorName"]:
                 case b'AdvancedPetBehavior':
                     pet_behavior = behavior
+                
+                case b'ItemBehavior':
+                    item_behavior = behavior
 
         self.max_guts = pet_behavior["m_nMaxGuts"]
         self.max_guile = pet_behavior["m_nMaxGuile"]
@@ -49,6 +53,7 @@ class Pet:
         self.max_agility = pet_behavior["m_nMaxAgility"]
         self.max_strength = pet_behavior["m_nMaxStrength"]
         self.max_will = pet_behavior["m_nMaxWill"]
+        self.item_flags = item_behavior["m_itemFlags"]
         self.base_powers = []
         self.base_talents = []
         for power in pet_behavior["m_powers"]:
