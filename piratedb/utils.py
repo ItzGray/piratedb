@@ -169,4 +169,3 @@ def iter_lazyobject_keys(types: TypeList, obj: LazyObject):
         iterd_lazyobject.append(item[0])
     
     return iterd_lazyobject
-

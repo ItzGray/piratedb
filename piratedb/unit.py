@@ -119,4 +119,3 @@ class Unit:
                 self.talents.append(talent["m_talentID"])
                 self.talent_ranks.append(talent["m_rank"])
                 self.talent_sources.append(sources[talent["m_source"]])
-

@@ -45,4 +45,3 @@ class Power:
                      
         self.pvp_tag = combat_ability_behavior["m_allowedIn"]
         self.target_type = combat_ability_behavior["m_targetType"]
-        
