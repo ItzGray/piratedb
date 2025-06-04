@@ -42,8 +42,8 @@ class Unit:
         self.template_id = obj["m_templateID"]
         self.name = state.make_unit_lang_key(obj)
         self.suffix = state.make_lang_key(obj)
-        if self.name == None:
-            self.name = self.suffix + " (Random Name)"
+        if self.name.id == None:
+            self.name = self.suffix
         self.real_name = obj["m_objectName"]
         self.image = obj["m_sIcon"][0].split(b"/")[-1]
         adj_list = obj["m_adjectiveList"]

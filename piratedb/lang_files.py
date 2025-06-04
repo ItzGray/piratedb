@@ -76,8 +76,7 @@ class UnitLangKey:
         for behavior in behaviors:
             if behavior == None:
                 continue
-
-            if behavior["m_behaviorName"] == "UnitBehavior":
+            if behavior["m_behaviorName"] == b"UnitBehavior":
                 unit_behavior = behavior
                 break
         if unit_behavior != None:

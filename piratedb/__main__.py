@@ -10,6 +10,8 @@ from .unit import Unit, is_unit_template
 from .pet import Pet, is_pet_template
 from .talent import Talent, is_talent_template
 from .power import Power, is_power_template
+from .pet_talents import PetTalent, is_pet_talent_template
+from .pet_powers import PetPower, is_pet_power_template
 from .state import State
 from .utils import ROOT, ROOT_WAD, TYPES
 
@@ -23,6 +25,8 @@ def deserialize_files(state: State):
     pets = []
     talents = []
     powers = []
+    pet_talents = []
+    pet_powers = []
                 
     for file in state.de.archive.iter_glob("ObjectData/**/*.xml"):
         obj = state.de.deserialize_from_path(file)
@@ -42,6 +46,14 @@ def deserialize_files(state: State):
             pet = Pet(state, obj)
             pets.append(pet)
 
+        if is_pet_talent_template(obj):
+            pet_talent = PetTalent(state, obj)
+            pet_talents.append(pet_talent)
+        
+        if is_pet_power_template(obj):
+            pet_power = PetPower(state, obj)
+            pet_powers.append(pet_power)
+
     for file in state.de.archive.iter_glob("Talents/*.xml"):
         obj = state.de.deserialize_from_path(file)
 
@@ -56,19 +68,19 @@ def deserialize_files(state: State):
             power = Power(state, obj)
             powers.append(power)
 
-    return items, units, pets, talents, powers
+    return items, units, pets, talents, powers, pet_talents, pet_powers
 
 def main():
     start = time.time()
     
     state = State(ROOT_WAD, TYPES)
-    items, units, pets, talents, powers = deserialize_files(state)
+    items, units, pets, talents, powers, pet_talents, pet_powers = deserialize_files(state)
 
     if ITEMS_DB.exists():
         ITEMS_DB.unlink()
 
     db = sqlite3.connect(str(ITEMS_DB))
-    build_db(state, items, units, pets, talents, powers, db)
+    build_db(state, items, units, pets, talents, powers, pet_talents, pet_powers, db)
     db.close()
 
     print(f"Success! Database written to {ITEMS_DB.absolute()} in {round(time.time() - start, 2)} seconds")

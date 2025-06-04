@@ -20,9 +20,6 @@ class State:
             self.file_to_id[filename] = tid
             self.id_to_file[tid] = filename
 
-    def add_spell(self, name: str) -> int:
-        return self.spells.get(name)
-
     def make_lang_key(self, obj: dict) -> LangKey:
         return LangKey(self.cache, obj)
     

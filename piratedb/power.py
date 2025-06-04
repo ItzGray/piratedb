@@ -31,6 +31,7 @@ class Power:
             self.image = obj["m_sIcon"][0].split(b"/")[-1]
         except:
             self.image = ""
+        # TODO: Make actual indications for stat multipliers on power descriptions
         self.description = state.make_desc_lang_key(obj)
         behaviors = obj["m_behaviors"]
         combat_ability_behavior = None
