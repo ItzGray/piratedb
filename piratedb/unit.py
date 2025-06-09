@@ -85,6 +85,7 @@ class Unit:
                 case b'MobArmyBehavior':
                     mob_army_behavior = behavior
         
+        self.curve = unit_behavior["m_classId"]
         self.school = find_school_tid(MANIFEST, unit_behavior["m_classId"])
         self.damage_type = STATS[unit_behavior["m_nDamageType"]]
         self.attack_type = ATTACK_TYPES[unit_behavior["m_nPrimaryAttack"]]

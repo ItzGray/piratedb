@@ -10,6 +10,21 @@ INIT_QUERIES = """CREATE TABLE locale_en (
 
 CREATE INDEX en_name_lookup ON locale_en(data);
 
+CREATE TABLE curves (
+    id                 integer not null primary key,
+    real_name          text,
+);
+
+CREATE TABLE curve_points (
+    id                 integer not null primary key,
+    curve              integer not null,
+    stat               text,
+
+    type               text,
+    level              integer,
+    value              integer,
+);
+
 CREATE TABLE items (
     id                 integer not null primary key,
     name               integer,
@@ -44,6 +59,7 @@ CREATE TABLE powers (
     name            integer,
     real_name       text,
     image           text,
+
     description     integer,
     pvp_tag         integer,
     target_type     integer,
@@ -58,6 +74,7 @@ CREATE TABLE talents (
     name            integer,
     real_name       text,
     image           text,
+
     ranks           integer,
 
     foreign key(name)   references locale_en(id)
@@ -84,6 +101,7 @@ CREATE TABLE units (
     name                integer,
     real_name           text,
     image               text,
+
     title               integer,
     school              text,
     attack_type         text,
@@ -92,6 +110,7 @@ CREATE TABLE units (
     beast_flag          integer,
     undead_flag         integer,
     bird_flag           integer,
+    curve               integer,
 
     foreign key(name)   references locale_en(id)
     foreign key(title)  references locale_en(id)
@@ -202,12 +221,13 @@ def _progress(_status, remaining, total):
     print(f'Copied {total-remaining} of {total} pages...')
 
 
-def build_db(state, items, units, pets, talents, powers, pet_talents, pet_powers, out):
+def build_db(state, curves, items, units, pets, talents, powers, pet_talents, pet_powers, out):
     mem = sqlite3.connect(":memory:")
     cursor = mem.cursor()
 
     initialize(cursor)
     insert_locale_data(cursor, state.cache)
+    insert_curves(cursor, curves)
     insert_items(cursor, items)
     insert_units(cursor, units)
     insert_pets(cursor, pets)
@@ -233,6 +253,42 @@ def insert_locale_data(cursor, cache: LangCache):
         cache.lookup.items()
     )
 
+def insert_curves(cursor, curves):
+    values = []
+    points = []
+
+    for curve in curves:
+        values.append((
+            curve.template_id,
+            curve.real_name
+        ))
+
+        for point in range(len(curve.curve_levels)):
+            points.append((
+                curve.template_id,
+                curve.curve_stats[point],
+                "Regular",
+                curve.curve_levels[point],
+                curve.curve_values[point]
+            ))
+        
+        for bonus in range(len(curve.curve_bonus_levels)):
+            points.append((
+                curve.template_id,
+                curve.curve_stats[bonus],
+                "Bonus",
+                curve.curve_bonus_levels[bonus],
+                curve.curve_bonus_values[bonus]
+            ))
+        
+    cursor.executemany(
+        """INSERT INTO curves(id,real_name) VALUES (?,?)""",
+        values
+    )
+
+    cursor.executemany(
+        """INSERT INTO curve_points(curve,stat,type,level,value) VALUES (?,?,?,?,?)"""
+    )
 
 def insert_items(cursor, items):
     values = []

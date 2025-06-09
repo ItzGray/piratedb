@@ -5,6 +5,7 @@ import sys
 import time
 
 from .db import build_db
+from .curve import Curve, is_curve_template
 from .item import Item, is_item_template
 from .unit import Unit, is_unit_template
 from .pet import Pet, is_pet_template
@@ -20,6 +21,7 @@ LOCALE = "Locale/English"
 
 
 def deserialize_files(state: State):
+    curves = []
     items = []
     units = []
     pets = []
@@ -33,6 +35,10 @@ def deserialize_files(state: State):
 
         if obj == None:
             continue
+
+        if is_curve_template(obj):
+            curve = Curve(state, obj)
+            curves.append(curve)
 
         if is_item_template(obj):
             item = Item(state, obj)
@@ -68,19 +74,19 @@ def deserialize_files(state: State):
             power = Power(state, obj)
             powers.append(power)
 
-    return items, units, pets, talents, powers, pet_talents, pet_powers
+    return curves, items, units, pets, talents, powers, pet_talents, pet_powers
 
 def main():
     start = time.time()
     
     state = State(ROOT_WAD, TYPES)
-    items, units, pets, talents, powers, pet_talents, pet_powers = deserialize_files(state)
+    curves, items, units, pets, talents, powers, pet_talents, pet_powers = deserialize_files(state)
 
     if ITEMS_DB.exists():
         ITEMS_DB.unlink()
 
     db = sqlite3.connect(str(ITEMS_DB))
-    build_db(state, items, units, pets, talents, powers, pet_talents, pet_powers, db)
+    build_db(state, curves, items, units, pets, talents, powers, pet_talents, pet_powers, db)
     db.close()
 
     print(f"Success! Database written to {ITEMS_DB.absolute()} in {round(time.time() - start, 2)} seconds")
