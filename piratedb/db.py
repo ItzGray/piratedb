@@ -12,7 +12,7 @@ CREATE INDEX en_name_lookup ON locale_en(data);
 
 CREATE TABLE curves (
     id                 integer not null primary key,
-    real_name          text,
+    real_name          text
 );
 
 CREATE TABLE curve_points (
@@ -22,7 +22,7 @@ CREATE TABLE curve_points (
 
     type               text,
     level              integer,
-    value              integer,
+    value              integer
 );
 
 CREATE TABLE items (
@@ -263,22 +263,22 @@ def insert_curves(cursor, curves):
             curve.real_name
         ))
 
-        for point in range(len(curve.curve_levels)):
+        for point in range(len(curve.curve_points)):
             points.append((
                 curve.template_id,
                 curve.curve_stats[point],
                 "Regular",
-                curve.curve_levels[point],
-                curve.curve_values[point]
+                curve.curve_points[point][0],
+                curve.curve_points[point][1]
             ))
         
-        for bonus in range(len(curve.curve_bonus_levels)):
+        for bonus in range(len(curve.curve_bonus_points)):
             points.append((
                 curve.template_id,
                 curve.curve_stats[bonus],
                 "Bonus",
-                curve.curve_bonus_levels[bonus],
-                curve.curve_bonus_values[bonus]
+                curve.curve_bonus_points[bonus][0],
+                curve.curve_bonus_points[bonus][1]
             ))
         
     cursor.executemany(
@@ -287,7 +287,8 @@ def insert_curves(cursor, curves):
     )
 
     cursor.executemany(
-        """INSERT INTO curve_points(curve,stat,type,level,value) VALUES (?,?,?,?,?)"""
+        """INSERT INTO curve_points(curve,stat,type,level,value) VALUES (?,?,?,?,?)""",
+        points
     )
 
 def insert_items(cursor, items):

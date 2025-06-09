@@ -32,22 +32,22 @@ class Curve:
         self.real_name = obj["m_objectName"]
 
         attributes = obj["m_attributes"]
-        self.curve_levels = []
-        self.curve_values = []
-        self.curve_bonus_levels = []
-        self.curve_bonus_values = []
+        self.curve_points = []
+        self.curve_bonus_points = []
         self.curve_stats = []
         for attribute in attributes:
-            stat = STATS[attribute["m_sStatName"]]
+            try:
+                stat = STATS[attribute["m_sStatName"]]
+            except:
+                continue
             if stat not in CURVE_STATS:
                 continue
             else:
                 point_list = attribute["m_pointList"]
                 for point in point_list:
-                    self.curve_levels.append(point["m_level"])
-                    self.curve_values.append(point["m_value"])
+                    self.curve_points.append((point["m_level"], point["m_value"]))
+                    self.curve_stats.append(stat)
                 bonus_list = attribute["m_bonusList"]
                 for bonus in bonus_list:
-                    self.curve_bonus_levels.append(bonus["m_level"])
-                    self.curve_bonus_values.append(bonus["m_value"])
-                self.curve_stats.append(stat)
+                    self.curve_bonus_points.append((bonus["m_level"], bonus["m_value"]))
+                    self.curve_stats.append(stat)
