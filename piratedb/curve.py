@@ -35,6 +35,7 @@ class Curve:
         self.curve_points = []
         self.curve_bonus_points = []
         self.curve_stats = []
+        self.curve_bonus_stats = []
         for attribute in attributes:
             try:
                 stat = STATS[attribute["m_sStatName"]]
@@ -49,5 +50,7 @@ class Curve:
                     self.curve_stats.append(stat)
                 bonus_list = attribute["m_bonusList"]
                 for bonus in bonus_list:
+                    if bonus["m_level"] == 0 or bonus["m_value"] == 0:
+                        continue
                     self.curve_bonus_points.append((bonus["m_level"], bonus["m_value"]))
-                    self.curve_stats.append(stat)
+                    self.curve_bonus_stats.append(stat)

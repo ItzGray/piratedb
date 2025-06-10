@@ -275,7 +275,7 @@ def insert_curves(cursor, curves):
         for bonus in range(len(curve.curve_bonus_points)):
             points.append((
                 curve.template_id,
-                curve.curve_stats[bonus],
+                curve.curve_bonus_stats[bonus],
                 "Bonus",
                 curve.curve_bonus_points[bonus][0],
                 curve.curve_bonus_points[bonus][1]
@@ -380,7 +380,8 @@ def insert_units(cursor, units):
             unit.primary_stat,
             unit.beast,
             unit.undead,
-            unit.bird
+            unit.bird,
+            unit.curve
         ))
 
         for stat in range(len(unit.stat_modifiers)):
@@ -410,7 +411,7 @@ def insert_units(cursor, units):
             ))
 
     cursor.executemany(
-        "INSERT INTO units(id,name,real_name,image,title,school,attack_type,dmg_type,primary_stat,beast_flag,undead_flag,bird_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO units(id,name,real_name,image,title,school,attack_type,dmg_type,primary_stat,beast_flag,undead_flag,bird_flag,curve) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(
