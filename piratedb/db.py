@@ -110,6 +110,7 @@ CREATE TABLE units (
     undead_flag         integer,
     bird_flag           integer,
     curve               integer,
+    kind                text,
 
     foreign key(name)   references locale_en(id)
     foreign key(title)  references locale_en(id)
@@ -379,7 +380,8 @@ def insert_units(cursor, units):
             unit.beast,
             unit.undead,
             unit.bird,
-            unit.curve
+            unit.curve,
+            unit.unit_type
         ))
 
         for stat in range(len(unit.stat_modifiers)):
@@ -409,7 +411,7 @@ def insert_units(cursor, units):
             ))
 
     cursor.executemany(
-        "INSERT INTO units(id,name,real_name,image,title,school,dmg_type,primary_stat,beast_flag,undead_flag,bird_flag,curve) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO units(id,name,real_name,image,title,school,dmg_type,primary_stat,beast_flag,undead_flag,bird_flag,curve,kind) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(
