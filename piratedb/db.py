@@ -104,7 +104,6 @@ CREATE TABLE units (
 
     title               integer,
     school              text,
-    attack_type         text,
     dmg_type            text,
     primary_stat        text,
     beast_flag          integer,
@@ -375,7 +374,6 @@ def insert_units(cursor, units):
             unit.image,
             unit.suffix.id,
             unit.school,
-            unit.attack_type,
             unit.damage_type,
             unit.primary_stat,
             unit.beast,
@@ -411,7 +409,7 @@ def insert_units(cursor, units):
             ))
 
     cursor.executemany(
-        "INSERT INTO units(id,name,real_name,image,title,school,attack_type,dmg_type,primary_stat,beast_flag,undead_flag,bird_flag,curve) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO units(id,name,real_name,image,title,school,dmg_type,primary_stat,beast_flag,undead_flag,bird_flag,curve) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(

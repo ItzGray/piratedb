@@ -26,11 +26,7 @@ def is_unit_template(obj: dict) -> bool:
             break
 
         if behavior["m_behaviorName"] == b"UnitBehavior":
-            try:
-                attack = ATTACK_TYPES[behavior["m_nPrimaryAttack"]]
-                is_unit = True
-            except KeyError:
-                is_unit = False
+            is_unit = True
 
     return is_unit
 
@@ -88,7 +84,6 @@ class Unit:
         self.curve = unit_behavior["m_classId"]
         self.school = find_school_tid(MANIFEST, unit_behavior["m_classId"])
         self.damage_type = STATS[unit_behavior["m_nDamageType"]]
-        self.attack_type = ATTACK_TYPES[unit_behavior["m_nPrimaryAttack"]]
         self.primary_stat = unit_behavior["m_nPrimaryStat"]
         self.stat_modifiers = []
         self.stat_modifier_values = []
@@ -98,11 +93,11 @@ class Unit:
             self.stat_modifiers.append(STATS[stat_modifier["m_sStatName"]])
             self.stat_modifier_values.append(round(stat_modifier["m_fAmount"], 2))
             self.stat_modifier_operators.append(MODIFIER_OPERATORS[stat_modifier["m_eOperator"]])
-        self.unitType = None
+        self.unit_type = None
         if mob_army_behavior != None:
-            self.unitType = "Enemy"
+            self.unit_type = "Enemy"
         else:
-            self.unitType = "Ally"
+            self.unit_type = "Ally"
         self.powers = []
         self.power_sources = []
         self.talents = []
