@@ -126,7 +126,7 @@ class Item:
                     self.weapon_type += "/"
             elif adjsplit[0] == b"EQUIP":
                 if adj in ITEM_TYPE_ADJECTIVES:
-                    self.item_type = adjsplit[-1]
+                    self.item_type = adjsplit[-1].decode("utf-8")
                     if self.item_type == "Body":
                         self.item_type = "Outfit"
                     elif self.item_type == "Token":
