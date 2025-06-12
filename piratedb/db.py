@@ -616,14 +616,14 @@ def insert_powers(cursor, powers):
             for stat in range(len(power.buff_adjustment_stats)):
                 adjustments.append((
                     power.template_id,
-                    "Buff",
+                    power.buff_type,
                     power.buff_adjustment_operators[stat],
                     power.buff_adjustment_stats[stat],
                     power.buff_adjustment_values[stat]
                 ))
             info.append((
                 power.template_id,
-                "Buff",
+                power.buff_type,
                 "",
                 power.buff_duration,
                 power.buff_stat,
