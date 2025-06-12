@@ -57,6 +57,8 @@ class LangCache:
                 file, _ = lang_ref.decode().split("_", 1)
                 self.add_file(f"{self.locale}/{file}.lang")
 
+        key_hash = fnv_1a(key)
+        lookup_get = self.lookup.get(key_hash)
         if lookup_get is not None:
             return key_hash
         else:

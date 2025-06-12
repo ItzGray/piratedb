@@ -68,6 +68,31 @@ CREATE TABLE powers (
     foreign key(description)    references locale_en(id)
 );
 
+CREATE TABLE power_adjustments (
+    id              integer not null primary key,
+    power           integer,
+
+    type            text,
+    operator        text,
+    stat            text,
+    amount          integer,
+
+    foreign key(power)  references powers(id)
+);
+
+CREATE TABLE power_info (
+    id              integer not null primary key,
+    power           integer,
+
+    type            text,
+    dmg_type        text,
+    duration        integer,
+    stat            text,
+    summoned        integer,
+    percent         integer,
+
+    foreign key(power)  references powers(id)
+);
 
 CREATE TABLE talents (
     id              integer not null primary key,
@@ -105,7 +130,7 @@ CREATE TABLE units (
     title               integer,
     school              text,
     dmg_type            text,
-    primary_stat        text,
+    primary_stat        integer,
     beast_flag          integer,
     undead_flag         integer,
     bird_flag           integer,
@@ -136,7 +161,7 @@ CREATE TABLE unit_stats (
     id       integer not null primary key,
     unit     integer not null,
 
-    stat     integer,
+    stat     text,
     operator integer,
     modifier integer,
 
@@ -505,6 +530,8 @@ def insert_talents(cursor, talents):
 
 def insert_powers(cursor, powers):
     values = []
+    adjustments = []
+    info = []
 
     for power in powers:
         values.append((
@@ -516,10 +543,105 @@ def insert_powers(cursor, powers):
             power.pvp_tag,
             power.target_type
         ))
+
+        if len(power.dmg_adjustment_stats) > 0:
+            for stat in range(len(power.dmg_adjustment_stats)):
+                adjustments.append((
+                    power.template_id,
+                    "Damage",
+                    power.dmg_adjustment_operators[stat],
+                    power.dmg_adjustment_stats[stat],
+                    power.dmg_adjustment_values[stat]
+                ))
+            info.append((
+                power.template_id,
+                "Damage",
+                power.power_dmg_type,
+                -1,
+                "",
+                -1,
+                -1
+            ))
+
+        if power.dot_duration != -1:
+            for stat in range(len(power.dot_dmg_adjustment_stats)):
+                adjustments.append((
+                    power.template_id,
+                    "DoT",
+                    power.dot_dmg_adjustment_operators[stat],
+                    power.dot_dmg_adjustment_stats[stat],
+                    power.dot_dmg_adjustment_values[stat]
+                ))
+            info.append((
+                power.template_id,
+                "DoT",
+                "",
+                power.dot_duration,
+                "",
+                -1,
+                -1
+            ))
+        
+        if power.trap_duration != -1:
+            for stat in range(len(power.trap_dmg_adjustment_stats)):
+                adjustments.append((
+                    power.template_id,
+                    "Trap",
+                    power.trap_dmg_adjustment_operators[stat],
+                    power.trap_dmg_adjustment_stats[stat],
+                    power.trap_dmg_adjustment_values[stat]
+                ))
+            info.append((
+                power.template_id,
+                "Trap",
+                "",
+                power.trap_duration,
+                power.stat_icon,
+                power.trap_summoned,
+                -1
+            ))
+
+        if power.summon_id != -1:
+            info.append((
+                power.template_id,
+                "Summon",
+                "",
+                -1,
+                "",
+                power.summon_id,
+                -1
+            ))
+        
+        if power.buff_duration != -1:
+            for stat in range(len(power.buff_adjustment_stats)):
+                adjustments.append((
+                    power.template_id,
+                    "Buff",
+                    power.buff_adjustment_operators[stat],
+                    power.buff_adjustment_stats[stat],
+                    power.buff_adjustment_values[stat]
+                ))
+            info.append((
+                power.template_id,
+                "Buff",
+                "",
+                power.buff_duration,
+                power.buff_stat,
+                -1,
+                power.buff_percent
+            ))
     
     cursor.executemany(
         "INSERT INTO powers(id,name,real_name,image,description,pvp_tag,target_type) VALUES (?,?,?,?,?,?,?)",
         values
+    )
+    cursor.executemany(
+        "INSERT INTO power_adjustments(power,type,operator,stat,amount) VALUES (?,?,?,?,?)",
+        adjustments
+    )
+    cursor.executemany(
+        "INSERT INTO power_info(power,type,dmg_type,duration,stat,summoned,percent) VALUES (?,?,?,?,?,?,?)",
+        info
     )
 
 def insert_pet_talents(cursor, pet_talents):
