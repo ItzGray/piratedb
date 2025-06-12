@@ -621,15 +621,16 @@ def insert_powers(cursor, powers):
                     power.buff_adjustment_stats[stat],
                     power.buff_adjustment_values[stat]
                 ))
-            info.append((
-                power.template_id,
-                power.buff_type,
-                "",
-                power.buff_duration,
-                power.buff_stat,
-                -1,
-                power.buff_percent
-            ))
+            for buff in power.buff_stats:
+                info.append((
+                    power.template_id,
+                    power.buff_type,
+                    "",
+                    power.buff_duration,
+                    buff,
+                    -1,
+                    power.buff_percent
+                ))
     
     cursor.executemany(
         "INSERT INTO powers(id,name,real_name,image,description,pvp_tag,target_type) VALUES (?,?,?,?,?,?,?)",

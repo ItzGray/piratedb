@@ -157,7 +157,6 @@ class Power:
                         self.trap_dmg_adjustment_stats.append(stat)
                         self.trap_dmg_adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
                         self.trap_dmg_adjustment_values.append(round(adjustment["m_fValue"], 2))
-                break
 
         self.summon_id = -1
         if summon_result != None:
@@ -166,7 +165,7 @@ class Power:
         self.buff_percent = -1
         self.buff_duration = -1
         self.buff_type = ""
-        self.buff_stat = ""
+        self.buff_stats = []
         self.buff_adjustment_stats = []
         self.buff_adjustment_operators = []
         self.buff_adjustment_values = []
@@ -174,7 +173,7 @@ class Power:
             self.buff_duration = buff_result["m_nDuration"]
             buff_modifiers = buff_result["m_modifiers"]
             for modifier in buff_modifiers:
-                self.buff_stat = STATS[modifier["m_sStatName"]]
+                self.buff_stats.append(STATS[modifier["m_sStatName"]])
                 buff_operator = MODIFIER_OPERATORS[modifier["m_eOperator"]]
                 if buff_operator == "Multiply Add":
                     self.buff_type = "Debuff"
@@ -187,9 +186,7 @@ class Power:
                         stat = STATS[adjustment["m_sStatName"]]
                     except:
                         self.buff_percent = adjustment["m_fValue"] * 100
-                        break
                     else:
                         self.buff_adjustment_stats.append(stat)
                         self.buff_adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
                         self.buff_adjustment_values.append(round(adjustment["m_fValue"], 2))
-                break
