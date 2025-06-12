@@ -40,12 +40,24 @@ class LangCache:
 
     def find_entry(self, key):
         key_hash = fnv_1a(key)
+        lookup_get = self.lookup.get(key_hash)
 
-        if self.lookup.get(key_hash) is None:
+        if lookup_get is None:
             file, _ = key.decode().split("_", 1)
             self.add_file(f"{self.locale}/{file}.lang")
 
-        if self.lookup.get(key_hash) is not None and self.lookup.get(key_hash) != "Natural Attack":
+        try:
+            lang_ref = lookup_get.split("&")[2]
+        except:
+            pass
+        else:
+            lang_ref = lookup_get.split("&")[1].encode("utf-8")
+            lang_ref_hash = fnv_1a(lang_ref)
+            if self.lookup.get(lang_ref_hash) is None:
+                file, _ = lang_ref.decode().split("_", 1)
+                self.add_file(f"{self.locale}/{file}.lang")
+
+        if lookup_get is not None:
             return key_hash
         else:
             return None
