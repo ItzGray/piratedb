@@ -1,4 +1,5 @@
 from enum import IntFlag
+from katsuba.utils import djb2 # type: ignore
 
 from .state import State
 from .utils import STATS, MODIFIER_OPERATORS
@@ -20,6 +21,13 @@ def is_power_template(obj: dict) -> bool:
             is_power = True
             break
     return is_power
+
+DOT_TYPES = {
+    487097: "Bleed",
+    487099: "Heal",
+    490762: "Poison",
+    490791: "Bleed",
+}
 
 class Power:
     def __init__(self, state: State, obj: dict):
@@ -45,148 +53,238 @@ class Power:
         self.target_type = combat_ability_behavior["m_targetType"]
         target_results = combat_ability_behavior["m_targetResults"]
         results = target_results["m_results"]
-        apply_dmg_result = None
-        dot_dmg_result = None
-        trap_dmg_result = None
-        summon_result = None
-        buff_result = None
-        for result in results:
-            if result == None:
-                continue
 
-            try:
-                damage_adjustments = result["m_pDamageAdjustments"]
-                inherit_dmg_type = result["m_bInheritDamageType"]
-            except:
-                pass
-            else:
-                apply_dmg_result = result
-
-            try:
-                adjustments = result["m_pAdjustments"]
-                effect_id = result["m_nEffectID"]
-            except:
-                pass
-            else:
-                dot_dmg_result = result
-
-            try:
-                modifiers = result["m_statModifiers"]
-                template_id = result["m_nTemplateID"]
-            except:
-                pass
-            else:
-                trap_dmg_result = result
-
-            try:
-                link_to_player = result["m_bLinkToPlayer"]
-                summon_level = result["m_nLevel"]
-            except:
-                pass
-            else:
-                summon_result = result
-
-            try:
-                result_target = result["m_resultTarget"]
-                modifiers = result["m_modifiers"]
-            except:
-                pass
-            else:
-                buff_result = result
-        
-        self.power_dmg_type = ""
+        # Oh dear
+        self.result_types = []
+        self.power_dmg_types = []
         self.dmg_adjustment_operators = []
         self.dmg_adjustment_stats = []
         self.dmg_adjustment_values = []
-        if apply_dmg_result != None:
-            if apply_dmg_result["m_bInheritDamageType"] == True:
-                self.power_dmg_type = "Inherit"
-            else:
-                self.power_dmg_type = STATS[apply_dmg_result["m_nDamageType"]]
-        
-            damage_adjustments = apply_dmg_result["m_pDamageAdjustments"]
-            adjustments = damage_adjustments["m_adjustments"]
-            for adjustment in adjustments:
-                try:
-                    stat = STATS[adjustment["m_sStatName"]]
-                except:
-                    continue
-                else:
-                    self.dmg_adjustment_stats.append(stat)
-                    self.dmg_adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
-                    self.dmg_adjustment_values.append(round(adjustment["m_fValue"], 2))
-        
-        self.dot_duration = -1
+        self.dot_durations = []
+        self.dot_types = []
         self.dot_dmg_adjustment_stats = []
         self.dot_dmg_adjustment_operators = []
         self.dot_dmg_adjustment_values = []
-        if dot_dmg_result != None:
-            self.dot_duration = dot_dmg_result["m_nDuration"]
-            dot_adjustments = dot_dmg_result["m_pAdjustments"]
-            adjustments = dot_adjustments["m_adjustments"]
-            for adjustment in adjustments:
-                try:
-                    stat = STATS[adjustment["m_sStatName"]]
-                except:
-                    continue
-                else:
-                    self.dot_dmg_adjustment_stats.append(stat)
-                    self.dot_dmg_adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
-                    self.dot_dmg_adjustment_values.append(round(adjustment["m_fValue"], 2))
-
-        self.trap_duration = -1
-        self.stat_icon = ""
-        self.trap_summoned = -1
+        self.trap_durations = []
+        self.stat_icons = []
+        self.trap_summons = []
         self.trap_dmg_adjustment_stats = []
         self.trap_dmg_adjustment_operators = []
         self.trap_dmg_adjustment_values = []
-        if trap_dmg_result != None:
-            self.trap_duration = trap_dmg_result["m_nDuration"]
-            self.trap_summoned = trap_dmg_result["m_nTemplateID"]
-            trap_modifiers = trap_dmg_result["m_statModifiers"]
-            for modifier in trap_modifiers:
-                self.stat_icon = STATS[modifier["m_nTargetStat"]]
-                trap_adjustments = modifier["m_pAdjustments"]
-                adjustments = trap_adjustments["m_adjustments"]
+        self.summon_ids = []
+        self.protect_durations = []
+        self.protect_percents = []
+        self.buff_percents = []
+        self.buff_durations = []
+        self.buff_types = []
+        self.buff_stats = []
+        self.buff_adjustment_stats = []
+        self.buff_adjustment_operators = []
+        self.buff_adjustment_values = []
+        self.absorb_durations = []
+        self.absorb_values = []
+        self.absorb_adjustment_stats = []
+        self.absorb_adjustment_operators = []
+        self.absorb_adjustment_values = []
+        self.ability_ids = []
+        self.heal_adjustment_stats = []
+        self.heal_adjustment_operators = []
+        self.heal_adjustment_values = []
+        for result in results:
+            if result == None:
+                continue
+            
+            adjustment_values = []
+            adjustment_operators = []
+            adjustment_stats = []
+
+            if result.type_hash == djb2("class ResApplyDamage"):
+                self.result_types.append(0)
+                if result["m_bInheritDamageType"] == True:
+                    self.power_dmg_types.append("Inherit")
+                else:
+                    self.power_dmg_types.append(STATS[result["m_nDamageType"]])
+        
+                damage_adjustments = result["m_pDamageAdjustments"]
+                adjustments = damage_adjustments["m_adjustments"]
+                for adjustment in adjustments:
+                    try:
+                        stat = STATS[adjustment["m_sStatName"]]
+                    except:
+                        if adjustment.type_hash == djb2("class ValueAdjustment"):
+                            try:
+                                adjustment_values[-1] = adjustment_values[-1] + adjustment["m_fValue"]
+                            except:
+                                pass
+                        elif adjustment.type_hash == djb2("class DamageTypeAdjustment"):
+                            rounded_val = round(adjustment["m_fValue"], 3)
+                            if rounded_val != 0:
+                                adjustment_stats.append("Weapon Power")
+                                adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
+                                adjustment_values.append(rounded_val)
+                        elif adjustment.type_hash == djb2("class PrimaryStatAdjustment"):
+                            rounded_val = round(adjustment["m_fValue"], 3)
+                            if rounded_val != 0:
+                                adjustment_stats.append("Primary Stat")
+                                adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
+                                adjustment_values.append(rounded_val)
+                    else:
+                        rounded_val = round(adjustment["m_fValue"], 3)
+                        if rounded_val != 0:
+                            adjustment_stats.append(stat)
+                            adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
+                            adjustment_values.append(rounded_val)
+                if len(adjustment_values) > 0:
+                    self.dmg_adjustment_stats.append(tuple(adjustment_stats))
+                    self.dmg_adjustment_operators.append(tuple(adjustment_operators))
+                    self.dmg_adjustment_values.append(tuple(adjustment_values))
+
+            elif result.type_hash == djb2("class ResCombatPulseEffect"):
+                self.result_types.append(1)
+                self.dot_durations.append(result["m_nDuration"])
+                try:
+                    self.dot_types.append(DOT_TYPES[result["m_nEffectID"]])
+                except:
+                    self.dot_types.append("Unknown")
+                dot_adjustments = result["m_pAdjustments"]
+                adjustments = dot_adjustments["m_adjustments"]
                 for adjustment in adjustments:
                     try:
                         stat = STATS[adjustment["m_sStatName"]]
                     except:
                         continue
                     else:
-                        self.trap_dmg_adjustment_stats.append(stat)
-                        self.trap_dmg_adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
-                        self.trap_dmg_adjustment_values.append(round(adjustment["m_fValue"], 2))
+                        rounded_val = round(adjustment["m_fValue"], 3)
+                        if rounded_val != 0:
+                            adjustment_stats.append(stat)
+                            adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
+                            adjustment_values.append(rounded_val)
+                if len(adjustment_values) > 0:
+                    self.dot_dmg_adjustment_stats.append(tuple(adjustment_stats))
+                    self.dot_dmg_adjustment_operators.append(tuple(adjustment_operators))
+                    self.dot_dmg_adjustment_values.append(tuple(adjustment_values))
 
-        self.summon_id = -1
-        if summon_result != None:
-            self.summon_id = summon_result["m_nTemplateID"]
+            elif result.type_hash == djb2("class ResSummonProp"):
+                self.result_types.append(2)
+                self.trap_durations.append(result["m_nDuration"])
+                self.trap_summons.append(result["m_nTemplateID"])
+                trap_modifiers = result["m_statModifiers"]
+                for modifier in trap_modifiers:
+                    self.stat_icons.append(STATS[modifier["m_nTargetStat"]])
+                    trap_adjustments = modifier["m_pAdjustments"]
+                    adjustments = trap_adjustments["m_adjustments"]
+                    for adjustment in adjustments:
+                        try:
+                            stat = STATS[adjustment["m_sStatName"]]
+                        except:
+                            continue
+                        else:
+                            rounded_val = round(adjustment["m_fValue"], 3)
+                            if rounded_val != 0:
+                                adjustment_stats.append(stat)
+                                adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
+                                adjustment_values.append(rounded_val)
+                    if len(adjustment_values) > 0:
+                        self.trap_dmg_adjustment_stats.append(tuple(adjustment_stats))
+                        self.trap_dmg_adjustment_operators.append(tuple(adjustment_operators))
+                        self.trap_dmg_adjustment_values.append(tuple(adjustment_values))
 
-        self.buff_percent = -1
-        self.buff_duration = -1
-        self.buff_type = ""
-        self.buff_stats = []
-        self.buff_adjustment_stats = []
-        self.buff_adjustment_operators = []
-        self.buff_adjustment_values = []
-        if buff_result != None:
-            self.buff_duration = buff_result["m_nDuration"]
-            buff_modifiers = buff_result["m_modifiers"]
-            for modifier in buff_modifiers:
-                self.buff_stats.append(STATS[modifier["m_sStatName"]])
-                buff_operator = MODIFIER_OPERATORS[modifier["m_eOperator"]]
-                if buff_operator == "Multiply Add":
-                    self.buff_type = "Debuff"
-                else:
-                    self.buff_type = "Buff"
-                buff_adjustments = modifier["m_pAdjustments"]
-                adjustments = buff_adjustments["m_adjustments"]
+            elif result.type_hash == djb2("class ResSummonHenchman"):
+                self.result_types.append(3)
+                self.summon_ids.append(result["m_nTemplateID"])
+
+            elif result.type_hash == djb2("class ResCombatDamageModifyEffect"):
+                self.result_types.append(4)
+                self.protect_durations.append(result["m_nDuration"])
+                modify_adjustments = result["m_pModifyAdjustments"]
+                adjustments = modify_adjustments["m_adjustments"]
+                for adjustment in adjustments:
+                    self.protect_percents.append(adjustment["m_fValue"] * 100)
+
+            elif result.type_hash == djb2("class ResCombatEffect"):
+                self.result_types.append(5)
+                self.buff_durations.append(result["m_nDuration"])
+                buff_modifiers = result["m_modifiers"]
+                buff_type = "Buff"
+                buff_operator = ""
+                for modifier in buff_modifiers:
+                    self.buff_stats.append(STATS[modifier["m_sStatName"]])
+                    buff_operator = MODIFIER_OPERATORS[modifier["m_eOperator"]]
+                    if buff_operator == "Multiply Add":
+                        buff_type = "Debuff"
+                    else:
+                        buff_type = "Buff"
+                    buff_adjustments = modifier["m_pAdjustments"]
+                    adjustments = buff_adjustments["m_adjustments"]
+                    for adjustment in adjustments:
+                        try:
+                            stat = STATS[adjustment["m_sStatName"]]
+                        except:
+                            value = round(adjustment["m_fValue"] * 100, 3)
+                            if value < 0:
+                                buff_type = "Debuff"
+                                value = value * -1
+                            self.buff_percents.append(value)
+                        else:
+                            rounded_val = round(adjustment["m_fValue"], 3)
+                            if rounded_val != 0:
+                                adjustment_stats.append(stat)
+                                adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
+                                adjustment_values.append(rounded_val)
+                                self.buff_percents.append(-1)
+                    if len(adjustment_values) > 0:
+                        self.buff_adjustment_stats.append(tuple(adjustment_stats))
+                        self.buff_adjustment_operators.append(tuple(adjustment_operators))
+                        self.buff_adjustment_values.append(tuple(adjustment_values))
+                if buff_operator == "":
+                    self.buff_stats.append("Unknown")
+                self.buff_types.append(buff_type)
+
+            elif result.type_hash == djb2("class ResCombatSpongeEffect"):
+                self.result_types.append(6)
+                sponge_adjustments = result["m_pSpongeAdjustments"]
+                adjustments = sponge_adjustments["m_adjustments"]
+                self.absorb_durations.append(result["m_nDuration"])
                 for adjustment in adjustments:
                     try:
                         stat = STATS[adjustment["m_sStatName"]]
                     except:
-                        self.buff_percent = adjustment["m_fValue"] * 100
+                        self.absorb_values.append(adjustment["m_fValue"])
                     else:
-                        self.buff_adjustment_stats.append(stat)
-                        self.buff_adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
-                        self.buff_adjustment_values.append(round(adjustment["m_fValue"], 2))
+                        rounded_val = round(adjustment["m_fValue"], 3)
+                        if rounded_val != 0:
+                            adjustment_stats.append(stat)
+                            adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
+                            adjustment_values.append(rounded_val)
+                            self.absorb_values.append(-1)
+                if len(adjustment_values) > 0:
+                    self.absorb_adjustment_stats.append(tuple(adjustment_stats))
+                    self.absorb_adjustment_operators.append(tuple(adjustment_operators))
+                    self.absorb_adjustment_values.append(tuple(adjustment_values))
+
+            elif result.type_hash == djb2("class ResActivateAbility"):
+                self.result_types.append(7)
+                self.ability_ids.append(result["m_nAbilityID"])
+
+            elif result.type_hash == djb2("class ResApplyHeal"):
+                self.result_types.append(8)
+                heal_adjustments = result["m_pAdjustments"]
+                adjustments = heal_adjustments["m_adjustments"]
+                for adjustment in adjustments:
+                    try:
+                        stat = STATS[adjustment["m_sStatName"]]
+                    except:
+                        continue
+                    else:
+                        if adjustment.type_hash == djb2("class RPSValueAdjustment"):
+                            # Handle this later
+                            continue
+                        rounded_val = round(adjustment["m_fValue"], 3)
+                        if rounded_val != 0:
+                            adjustment_stats.append(stat)
+                            adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
+                            adjustment_values.append(rounded_val)
+                if len(adjustment_values) > 0:
+                    self.heal_adjustment_stats.append(tuple(adjustment_stats))
+                    self.heal_adjustment_operators.append(tuple(adjustment_operators))
+                    self.heal_adjustment_values.append(tuple(adjustment_values))

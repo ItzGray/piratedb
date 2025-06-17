@@ -72,6 +72,7 @@ CREATE TABLE power_adjustments (
     id              integer not null primary key,
     power           integer,
 
+    adjustment_num  integer,
     type            text,
     operator        text,
     stat            text,
@@ -85,7 +86,7 @@ CREATE TABLE power_info (
     power           integer,
 
     type            text,
-    dmg_type        text,
+    subtype         text,
     duration        integer,
     stat            text,
     summoned        integer,
@@ -544,104 +545,196 @@ def insert_powers(cursor, powers):
             power.target_type
         ))
 
-        if len(power.dmg_adjustment_stats) > 0:
-            for stat in range(len(power.dmg_adjustment_stats)):
-                adjustments.append((
-                    power.template_id,
-                    "Damage",
-                    power.dmg_adjustment_operators[stat],
-                    power.dmg_adjustment_stats[stat],
-                    power.dmg_adjustment_values[stat]
-                ))
-            info.append((
-                power.template_id,
-                "Damage",
-                power.power_dmg_type,
-                -1,
-                "",
-                -1,
-                -1
-            ))
-
-        if power.dot_duration != -1:
-            for stat in range(len(power.dot_dmg_adjustment_stats)):
-                adjustments.append((
-                    power.template_id,
-                    "DoT",
-                    power.dot_dmg_adjustment_operators[stat],
-                    power.dot_dmg_adjustment_stats[stat],
-                    power.dot_dmg_adjustment_values[stat]
-                ))
-            info.append((
-                power.template_id,
-                "DoT",
-                "",
-                power.dot_duration,
-                "",
-                -1,
-                -1
-            ))
-        
-        if power.trap_duration != -1:
-            for stat in range(len(power.trap_dmg_adjustment_stats)):
-                adjustments.append((
-                    power.template_id,
-                    "Trap",
-                    power.trap_dmg_adjustment_operators[stat],
-                    power.trap_dmg_adjustment_stats[stat],
-                    power.trap_dmg_adjustment_values[stat]
-                ))
-            info.append((
-                power.template_id,
-                "Trap",
-                "",
-                power.trap_duration,
-                power.stat_icon,
-                power.trap_summoned,
-                -1
-            ))
-
-        if power.summon_id != -1:
-            info.append((
-                power.template_id,
-                "Summon",
-                "",
-                -1,
-                "",
-                power.summon_id,
-                -1
-            ))
-        
-        if power.buff_duration != -1:
-            for stat in range(len(power.buff_adjustment_stats)):
-                adjustments.append((
-                    power.template_id,
-                    power.buff_type,
-                    power.buff_adjustment_operators[stat],
-                    power.buff_adjustment_stats[stat],
-                    power.buff_adjustment_values[stat]
-                ))
-            for buff in power.buff_stats:
+        counts = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        adjustment_count = 0
+        for type in power.result_types:
+            if type == 0:
+                try:
+                    for value in range(len(power.dmg_adjustment_values[counts[type]])):
+                        adjustments.append((
+                            power.template_id,
+                            adjustment_count,
+                            "Damage",
+                            power.dmg_adjustment_operators[counts[type]][value],
+                            power.dmg_adjustment_stats[counts[type]][value],
+                            power.dmg_adjustment_values[counts[type]][value]
+                        ))
+                    adjustment_count += 1
+                except:
+                    pass
                 info.append((
                     power.template_id,
-                    power.buff_type,
-                    "",
-                    power.buff_duration,
-                    buff,
+                    "Damage",
+                    power.power_dmg_types[counts[type]],
                     -1,
-                    power.buff_percent
+                    "",
+                    -1,
+                    -1
                 ))
+            elif type == 1:
+                try:
+                    for value in range(len(power.dot_dmg_adjustment_values[counts[type]])):
+                        adjustments.append((
+                            power.template_id,
+                            adjustment_count,
+                            "DoT",
+                            power.dot_dmg_adjustment_operators[counts[type]][value],
+                            power.dot_dmg_adjustment_stats[counts[type]][value],
+                            power.dot_dmg_adjustment_values[counts[type]][value]
+                        ))
+                    adjustment_count += 1
+                except:
+                    pass
+                info.append((
+                    power.template_id,
+                    "DoT",
+                    power.dot_types[counts[type]],
+                    power.dot_durations[counts[type]],
+                    "",
+                    -1,
+                    -1
+                ))
+            elif type == 2:
+                try:
+                    for value in range(len(power.trap_dmg_adjustment_values[counts[type]])):
+                        adjustments.append((
+                            power.template_id,
+                            adjustment_count,
+                            "Trap",
+                            power.trap_dmg_adjustment_operators[counts[type]][value],
+                            power.trap_dmg_adjustment_stats[counts[type]][value],
+                            power.trap_dmg_adjustment_values[counts[type]][value]
+                        ))
+                    adjustment_count += 1
+                except:
+                    pass
+                try:
+                    info.append((
+                        power.template_id,
+                        "Trap",
+                        "",
+                        power.trap_durations[counts[type]],
+                        power.stat_icons[counts[type]],
+                        power.trap_summons[counts[type]],
+                        -1
+                    ))
+                except:
+                    pass
+            elif type == 3:
+                info.append((
+                    power.template_id,
+                    "Summon",
+                    "",
+                    -1,
+                    "",
+                    power.summon_ids[counts[type]],
+                    -1
+                ))
+            elif type == 4:
+                info.append((
+                    power.template_id,
+                    "Protect",
+                    "",
+                    power.protect_durations[counts[type]],
+                    "",
+                    -1,
+                    power.protect_percents[counts[type]]
+                ))
+            elif type == 5:
+                try:
+                    for value in range(len(power.buff_adjustment_values[counts[type]])):
+                        adjustments.append((
+                            power.template_id,
+                            adjustment_count,
+                            "Buff",
+                            power.buff_adjustment_operators[counts[type]][value],
+                            power.buff_adjustment_stats[counts[type]][value],
+                            power.buff_adjustment_values[counts[type]][value]
+                        ))
+                    adjustment_count += 1
+                except:
+                    pass
+                try:
+                    info.append((
+                        power.template_id,
+                        "Buff",
+                        power.buff_types[counts[type]],
+                        power.buff_durations[counts[type]],
+                        power.buff_stats[counts[type]],
+                        -1,
+                        power.buff_percents[counts[type]]
+                    ))
+                except:
+                    pass
+            elif type == 6:
+                try:
+                    for value in range(len(power.absorb_adjustment_values[counts[type]])):
+                        adjustments.append((
+                            power.template_id,
+                            adjustment_count,
+                            "Absorb",
+                            power.absorb_adjustment_operators[counts[type]][value],
+                            power.absorb_adjustment_stats[counts[type]][value],
+                            power.absorb_adjustment_values[counts[type]][value]
+                        ))
+                    adjustment_count += 1
+                except:
+                    pass
+                info.append((
+                    power.template_id,
+                    "Absorb",
+                    "",
+                    power.absorb_durations[counts[type]],
+                    power.absorb_values[counts[type]],
+                    -1,
+                    -1
+                ))
+            elif type == 7:
+                info.append((
+                    power.template_id,
+                    "Ability",
+                    "",
+                    -1,
+                    "",
+                    power.ability_ids[counts[type]],
+                    -1
+                ))
+            elif type == 8:
+                try:
+                    for value in range(len(power.heal_adjustment_values[counts[type]])):
+                        adjustments.append((
+                            power.template_id,
+                            adjustment_count,
+                            "Heal",
+                            power.heal_adjustment_operators[counts[type]][value],
+                            power.heal_adjustment_stats[counts[type]][value],
+                            power.heal_adjustment_values[counts[type]][value]
+                        ))
+                    adjustment_count += 1
+                    info.append((
+                        power.template_id,
+                        "Heal",
+                        "",
+                        -1,
+                        "",
+                        -1,
+                        -1,
+                    ))
+                except:
+                    pass
+            
+            counts[type] += 1
     
     cursor.executemany(
         "INSERT INTO powers(id,name,real_name,image,description,pvp_tag,target_type) VALUES (?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(
-        "INSERT INTO power_adjustments(power,type,operator,stat,amount) VALUES (?,?,?,?,?)",
+        "INSERT INTO power_adjustments(power,adjustment_num,type,operator,stat,amount) VALUES (?,?,?,?,?,?)",
         adjustments
     )
     cursor.executemany(
-        "INSERT INTO power_info(power,type,dmg_type,duration,stat,summoned,percent) VALUES (?,?,?,?,?,?,?)",
+        "INSERT INTO power_info(power,type,subtype,duration,stat,summoned,percent) VALUES (?,?,?,?,?,?,?)",
         info
     )
 
