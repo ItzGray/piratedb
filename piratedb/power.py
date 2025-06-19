@@ -224,6 +224,8 @@ class Power:
                             if value < 0:
                                 buff_type = "Debuff"
                                 value = value * -1
+                            elif buff_type == "Debuff":
+                                value = 100 - value
                             self.buff_percents.append(value)
                         else:
                             rounded_val = round(adjustment["m_fValue"], 3)
