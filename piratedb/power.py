@@ -238,6 +238,7 @@ class Power:
                         self.buff_adjustment_values.append(tuple(adjustment_values))
                 if buff_operator == "":
                     self.buff_stats.append("Unknown")
+                    self.buff_percents.append(-1)
                 self.buff_types.append(buff_type)
 
             elif result.type_hash == djb2("class ResCombatSpongeEffect"):
