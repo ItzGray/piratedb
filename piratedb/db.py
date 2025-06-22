@@ -651,21 +651,29 @@ def insert_powers(cursor, powers):
                             power.buff_adjustment_stats[counts[type]][value],
                             power.buff_adjustment_values[counts[type]][value]
                         ))
-                    adjustment_count += 1
+                        info.append((
+                            power.template_id,
+                            "Buff",
+                            power.buff_types[value],
+                            power.buff_durations[value],
+                            power.buff_stats[value],
+                            -1,
+                            -1
+                        ))
+                        adjustment_count += 1
                 except:
-                    pass
-                try:
-                    info.append((
-                        power.template_id,
-                        "Buff",
-                        power.buff_types[counts[type]],
-                        power.buff_durations[counts[type]],
-                        power.buff_stats[counts[type]],
-                        -1,
-                        power.buff_percents[counts[type]]
-                    ))
-                except:
-                    pass
+                    try:
+                        info.append((
+                            power.template_id,
+                            "Buff",
+                            power.buff_types[counts[type]],
+                            power.buff_durations[counts[type]],
+                            power.buff_stats[counts[type]],
+                            -1,
+                            power.buff_percents[counts[type]]
+                        ))
+                    except:
+                        pass
             elif type == 6:
                 try:
                     for value in range(len(power.absorb_adjustment_values[counts[type]])):

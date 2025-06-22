@@ -170,6 +170,9 @@ class Power:
                 self.trap_summons.append(result["m_nTemplateID"])
                 trap_modifiers = result["m_statModifiers"]
                 for modifier in trap_modifiers:
+                    adjustment_values = []
+                    adjustment_operators = []
+                    adjustment_stats = []
                     self.stat_icons.append(STATS[modifier["m_nTargetStat"]])
                     trap_adjustments = modifier["m_pAdjustments"]
                     adjustments = trap_adjustments["m_adjustments"]
@@ -184,10 +187,10 @@ class Power:
                                 adjustment_stats.append(stat)
                                 adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
                                 adjustment_values.append(rounded_val)
-                    if len(adjustment_values) > 0:
-                        self.trap_dmg_adjustment_stats.append(tuple(adjustment_stats))
-                        self.trap_dmg_adjustment_operators.append(tuple(adjustment_operators))
-                        self.trap_dmg_adjustment_values.append(tuple(adjustment_values))
+                if len(adjustment_values) > 0:
+                    self.trap_dmg_adjustment_stats.append(tuple(adjustment_stats))
+                    self.trap_dmg_adjustment_operators.append(tuple(adjustment_operators))
+                    self.trap_dmg_adjustment_values.append(tuple(adjustment_values))
 
             elif result.type_hash == djb2("class ResSummonHenchman"):
                 self.result_types.append(3)
@@ -201,13 +204,14 @@ class Power:
                 for adjustment in adjustments:
                     self.protect_percents.append(adjustment["m_fValue"] * 100)
 
-            elif result.type_hash == djb2("class ResCombatEffect"):
+            elif result.type_hash == djb2("class ResCombatEffect") or result.type_hash == djb2("class ResCombatStatusEffect"):
                 self.result_types.append(5)
-                self.buff_durations.append(result["m_nDuration"])
+                effect_id = result["m_nEffectID"]
                 buff_modifiers = result["m_modifiers"]
                 buff_type = "Buff"
                 buff_operator = ""
                 for modifier in buff_modifiers:
+                    self.buff_durations.append(result["m_nDuration"])
                     self.buff_stats.append(STATS[modifier["m_sStatName"]])
                     buff_operator = MODIFIER_OPERATORS[modifier["m_eOperator"]]
                     if buff_operator == "Multiply Add":
@@ -234,14 +238,16 @@ class Power:
                                 adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
                                 adjustment_values.append(rounded_val)
                                 self.buff_percents.append(-1)
-                    if len(adjustment_values) > 0:
-                        self.buff_adjustment_stats.append(tuple(adjustment_stats))
-                        self.buff_adjustment_operators.append(tuple(adjustment_operators))
-                        self.buff_adjustment_values.append(tuple(adjustment_values))
-                if buff_operator == "":
-                    self.buff_stats.append("Unknown")
-                    self.buff_percents.append(-1)
-                self.buff_types.append(buff_type)
+                    if buff_operator == "":
+                        self.buff_stats.append("Unknown")
+                        self.buff_percents.append(-1)
+                    if effect_id == 656655:
+                        buff_type = "Curse"
+                    self.buff_types.append(buff_type)
+                if len(adjustment_values) > 0:
+                    self.buff_adjustment_stats.append(tuple(adjustment_stats))
+                    self.buff_adjustment_operators.append(tuple(adjustment_operators))
+                    self.buff_adjustment_values.append(tuple(adjustment_values))
 
             elif result.type_hash == djb2("class ResCombatSpongeEffect"):
                 self.result_types.append(6)
