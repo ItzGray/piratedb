@@ -121,6 +121,17 @@ CREATE TABLE talent_ranks (
 
 CREATE INDEX talent_rank_lookup ON talent_ranks(talent);
 
+CREATE TABLE talent_stats (
+    id              integer not null primary key,
+    talent          integer not null,
+    rank            integer,
+
+    operator        text,
+    stat            text,
+    amount          integer,
+
+    foreign key(talent) references talents(id)
+);
 
 CREATE TABLE units (
     id                  integer not null primary key,
@@ -501,6 +512,7 @@ def insert_pets(cursor, pets):
 def insert_talents(cursor, talents):
     values = []
     descriptions = []
+    stats = []
 
     for talent in talents:
         values.append((
@@ -518,6 +530,13 @@ def insert_talents(cursor, talents):
                 talent.descriptions[description].id,
                 talent.unit_levels[description]
             ))
+            stats.append((
+                talent.template_id,
+                talent.ranks[description],
+                talent.rank_operators[description],
+                talent.rank_stats[description],
+                talent.rank_values[description]
+            ))
     
     cursor.executemany(
         "INSERT INTO talents(id,name,real_name,image,ranks) VALUES (?,?,?,?,?)",
@@ -526,6 +545,10 @@ def insert_talents(cursor, talents):
     cursor.executemany(
         """INSERT INTO talent_ranks(talent,rank,description,level_req_unit) VALUES (?,?,?,?)""",
         descriptions
+    )
+    cursor.executemany(
+        """INSERT INTO talent_stats(talent,rank,operator,stat,amount) VALUES (?,?,?,?,?)""",
+        stats
     )
 
 
