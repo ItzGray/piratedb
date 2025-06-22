@@ -2,7 +2,8 @@ from enum import IntFlag
 from katsuba.utils import djb2 # type: ignore
 
 from .state import State
-from .utils import STATS, MODIFIER_OPERATORS
+from .utils import STATS, MODIFIER_OPERATORS, MANIFEST
+from .tid_find import find_tid_path
 
 def is_power_template(obj: dict) -> bool:
     try:
@@ -167,7 +168,8 @@ class Power:
             elif result.type_hash == djb2("class ResSummonProp"):
                 self.result_types.append(2)
                 self.trap_durations.append(result["m_nDuration"])
-                self.trap_summons.append(result["m_nTemplateID"])
+                tid_path = find_tid_path(MANIFEST, result["m_nTemplateID"])
+                self.trap_summons.append(state.make_lang_key(state.de.deserialize_from_path(tid_path)))
                 trap_modifiers = result["m_statModifiers"]
                 for modifier in trap_modifiers:
                     adjustment_values = []

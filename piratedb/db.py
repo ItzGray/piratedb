@@ -638,7 +638,7 @@ def insert_powers(cursor, powers):
                         "",
                         power.trap_durations[counts[type]],
                         power.stat_icons[counts[type]],
-                        power.trap_summons[counts[type]],
+                        power.trap_summons[counts[type]].id,
                         -1
                     ))
                 except:
