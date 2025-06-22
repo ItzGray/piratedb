@@ -238,11 +238,13 @@ class Power:
                                 adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
                                 adjustment_values.append(rounded_val)
                                 self.buff_percents.append(-1)
-                    if buff_operator == "":
-                        self.buff_stats.append("Unknown")
-                        self.buff_percents.append(-1)
                     if effect_id == 656655:
                         buff_type = "Curse"
+                    self.buff_types.append(buff_type)
+                if buff_operator == "":
+                    self.buff_stats.append("Unknown")
+                    self.buff_percents.append(-1)
+                    self.buff_durations.append(result["m_nDuration"])
                     self.buff_types.append(buff_type)
                 if len(adjustment_values) > 0:
                     self.buff_adjustment_stats.append(tuple(adjustment_stats))
