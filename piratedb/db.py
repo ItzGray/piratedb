@@ -699,15 +699,16 @@ def insert_powers(cursor, powers):
                         adjustment_count += 1
                 except:
                     try:
-                        info.append((
-                            power.template_id,
-                            "Buff",
-                            power.buff_types[counts[type]],
-                            power.buff_durations[counts[type]],
-                            power.buff_stats[counts[type]],
-                            -1,
-                            power.buff_percents[counts[type]]
-                        ))
+                        for amount in range(power.buff_adjustment_count):
+                            info.append((
+                                power.template_id,
+                                "Buff",
+                                power.buff_types[counts[type] + amount],
+                                power.buff_durations[counts[type] + amount],
+                                power.buff_stats[counts[type] + amount],
+                                -1,
+                                power.buff_percents[counts[type] + amount]
+                            ))
                     except:
                         pass
             elif type == 6:

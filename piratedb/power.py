@@ -82,6 +82,7 @@ class Power:
         self.buff_adjustment_stats = []
         self.buff_adjustment_operators = []
         self.buff_adjustment_values = []
+        self.buff_adjustment_count = 0
         self.absorb_durations = []
         self.absorb_values = []
         self.absorb_adjustment_stats = []
@@ -194,7 +195,7 @@ class Power:
                     self.trap_dmg_adjustment_operators.append(tuple(adjustment_operators))
                     self.trap_dmg_adjustment_values.append(tuple(adjustment_values))
 
-            elif result.type_hash == djb2("class ResSummonHenchman"):
+            elif result.type_hash == djb2("class ResSummonHenchman") or result.type_hash == djb2("class ResSummonUnit"):
                 self.result_types.append(3)
                 self.summon_ids.append(result["m_nTemplateID"])
 
@@ -240,6 +241,7 @@ class Power:
                                 adjustment_operators.append(MODIFIER_OPERATORS[adjustment["m_eOperator"]])
                                 adjustment_values.append(rounded_val)
                                 self.buff_percents.append(-1)
+                        self.buff_adjustment_count += 1
                     if effect_id == 656655:
                         buff_type = "Curse"
                     self.buff_types.append(buff_type)
