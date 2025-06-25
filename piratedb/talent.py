@@ -26,9 +26,12 @@ class Talent:
         self.rank_operators = []
         self.rank_stats = []
         self.rank_values = []
+        self.rank_images = []
+        self.rank_tooltips = []
         self.descriptions = []
         self.unit_levels = []
         for rank in ranks:
+            rank_img_lst = []
             if rank["m_requiredUnitLevel"] > 0:
                 self.unit_levels.append(rank["m_requiredUnitLevel"])
             else:
@@ -36,6 +39,24 @@ class Talent:
             self.rank_count += 1
             self.ranks.append(self.rank_count)
             self.descriptions.append(state.make_desc_lang_key(rank))
+            try:
+                rank_img_lst.append(rank["m_sBottomLeftIcon"].split(b"/")[-1])
+            except:
+                rank_img_lst.append("")
+            try:
+                rank_img_lst.append(rank["m_sBottomRightIcon"].split(b"/")[-1])
+            except:
+                rank_img_lst.append("")
+            try:
+                rank_img_lst.append(rank["m_sUpperLeftIcon"].split(b"/")[-1])
+            except:
+                rank_img_lst.append("")
+            self.rank_images.append(tuple(rank_img_lst))
+            rank_tooltip_lst = []
+            rank_tooltip_lst.append(state.make_rank_tooltip_lang_key(rank, "m_sBottomLeftText"))
+            rank_tooltip_lst.append(state.make_rank_tooltip_lang_key(rank, "m_sBottomRightText"))
+            rank_tooltip_lst.append(state.make_rank_tooltip_lang_key(rank, "m_sUpperLeftText"))
+            self.rank_tooltips.append(tuple(rank_tooltip_lst))
             effects = rank["m_effects"]
             for effect in effects:
                 if effect.type_hash == djb2("class StatModifierInfo"):

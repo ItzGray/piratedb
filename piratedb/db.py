@@ -115,6 +115,13 @@ CREATE TABLE talent_ranks (
     description     integer,
     level_req_unit  integer,
 
+    bottom_left_icon text,
+    bottom_right_icon text,
+    upper_left_icon text,
+    bottom_left_text integer,
+    bottom_right_text integer,
+    upper_left_text integer,
+
     foreign key(talent) references talents(id)
     foreign key(description)    references locale_en(id)
 );
@@ -528,7 +535,13 @@ def insert_talents(cursor, talents):
                 talent.template_id,
                 talent.ranks[description],
                 talent.descriptions[description].id,
-                talent.unit_levels[description]
+                talent.unit_levels[description],
+                talent.rank_images[description][0],
+                talent.rank_images[description][1],
+                talent.rank_images[description][2],
+                talent.rank_tooltips[description][0].id,
+                talent.rank_tooltips[description][1].id,
+                talent.rank_tooltips[description][2].id
             ))
             stats.append((
                 talent.template_id,
@@ -543,7 +556,7 @@ def insert_talents(cursor, talents):
         values
     )
     cursor.executemany(
-        """INSERT INTO talent_ranks(talent,rank,description,level_req_unit) VALUES (?,?,?,?)""",
+        """INSERT INTO talent_ranks(talent,rank,description,level_req_unit,bottom_left_icon,bottom_right_icon,upper_left_icon,bottom_left_text,bottom_right_text,upper_left_text) VALUES (?,?,?,?,?,?,?,?,?,?)""",
         descriptions
     )
     cursor.executemany(

@@ -117,3 +117,14 @@ class DescLangKey:
         self.id = cache.find_entry(key)
         if self.id is None:
             return
+
+class RankTooltipLangKey:
+    def __init__(self, cache: LangCache, obj: dict, text_location: str):
+        key = obj[text_location]
+        if key == b"":
+            self.id = None
+            return
+
+        self.id = cache.find_entry(key)
+        if self.id is None:
+            return

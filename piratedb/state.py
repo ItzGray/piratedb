@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from .lang_files import LangCache, LangKey, UnitLangKey, DescLangKey
+from .lang_files import LangCache, LangKey, UnitLangKey, DescLangKey, RankTooltipLangKey
 from .deserializer import BinDeserializer
 
 class State:
@@ -28,6 +28,9 @@ class State:
     
     def make_desc_lang_key(self, obj: dict) -> DescLangKey:
         return DescLangKey(self.cache, obj)
+    
+    def make_rank_tooltip_lang_key(self, obj: dict, text_type: str) -> DescLangKey:
+        return RankTooltipLangKey(self.cache, obj, text_type)
     
     def get_lang_str(self, langkey: LangKey) -> str:
         return self.cache.lookup.get(langkey.id)
