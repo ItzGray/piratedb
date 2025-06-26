@@ -213,26 +213,32 @@ class Power:
                 buff_modifiers = result["m_modifiers"]
                 buff_type = "Buff"
                 buff_operator = ""
+                effect_path = find_tid_path(MANIFEST, effect_id)
+                if effect_path is None:
+                    continue
+                effect = state.de.deserialize_from_path(effect_path)
+                if b"POWER_BUFF" in effect["m_adjectives"]:
+                    buff_type = "Buff"
+                elif b"POWER_DEBUFF" in effect["m_adjectives"]:
+                    buff_type = "Debuff"
                 for modifier in buff_modifiers:
                     self.buff_durations.append(result["m_nDuration"])
                     self.buff_stats.append(STATS[modifier["m_sStatName"]])
                     buff_operator = MODIFIER_OPERATORS[modifier["m_eOperator"]]
-                    if buff_operator == "Multiply Add":
-                        buff_type = "Debuff"
-                    else:
-                        buff_type = "Buff"
                     buff_adjustments = modifier["m_pAdjustments"]
                     adjustments = buff_adjustments["m_adjustments"]
                     for adjustment in adjustments:
                         try:
                             stat = STATS[adjustment["m_sStatName"]]
                         except:
-                            value = round(adjustment["m_fValue"] * 100, 3)
+                            if adjustment.type_hash == djb2("class ValueAdjustment") and adjustment["m_eOperator"] == 0 and buff_operator == "Multiply Add":
+                                value = (adjustment["m_fValue"] * 100) - 100
+                            else:
+                                value = round(adjustment["m_fValue"] * 100, 3)
                             if value < 0:
                                 buff_type = "Debuff"
-                                value = value * -1
                             elif buff_type == "Debuff":
-                                value = 100 - value
+                                value = (100 - value) * -1
                             self.buff_percents.append(value)
                         else:
                             rounded_val = round(adjustment["m_fValue"], 3)
