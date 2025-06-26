@@ -248,14 +248,15 @@ class Power:
                                 adjustment_values.append(rounded_val)
                                 self.buff_percents.append(-1)
                         self.buff_adjustment_count += 1
-                    if effect_id == 656655:
-                        buff_type = "Curse"
                     self.buff_types.append(buff_type)
+                if effect_id == 656655:
+                    buff_type = "Curse"
                 if buff_operator == "":
                     self.buff_stats.append("Unknown")
                     self.buff_percents.append(-1)
                     self.buff_durations.append(result["m_nDuration"])
                     self.buff_types.append(buff_type)
+                    self.buff_adjustment_count += 1
                 if len(adjustment_values) > 0:
                     self.buff_adjustment_stats.append(tuple(adjustment_stats))
                     self.buff_adjustment_operators.append(tuple(adjustment_operators))
