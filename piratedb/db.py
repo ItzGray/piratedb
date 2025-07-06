@@ -292,6 +292,9 @@ def initialize(cursor):
 
 
 def insert_locale_data(cursor, cache: LangCache):
+    for num in cache.lookup:
+        if "<BR>" in cache.lookup[num]:
+            cache.lookup[num] = cache.lookup[num].replace("<BR>", "")
     cursor.executemany(
         "INSERT INTO locale_en(id, data) VALUES (?, ?)",
         cache.lookup.items()

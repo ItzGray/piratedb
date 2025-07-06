@@ -12,7 +12,8 @@ ITEM_TYPE_ADJECTIVES = [
     b"EQUIP_Hat",
     b"EQUIP_Token",
     b"EQUIP_Neck",
-    b"EQUIP_Ring"
+    b"EQUIP_Ring",
+    b"EQUIP_Mount"
 ]
 WEAPON_TYPE_ADJECTIVES = [
     b"TALENT_SHOOTY",
@@ -78,6 +79,13 @@ def _is_power_effect(effect: LazyObject) -> bool:
 
 def _is_weapon_effect(effect: LazyObject) -> bool:
     return len(effect) == 6
+
+def _is_speed_effect(effect: LazyObject) -> bool:
+    try:
+        speed = effect["m_speedMultiplier"]
+    except KeyError:
+        return False
+    return len(effect) == 4
 
 class Item:
     def __init__(self, state: State, obj: dict):
@@ -172,3 +180,6 @@ class Item:
                 elif _is_weapon_effect(effect):
                     self.weapon_damage_type = STATS[effect["m_nDamageType"]]
                     self.weapon_primary_stat = effect["m_nPrimaryStat"]
+                elif _is_speed_effect(effect):
+                    self.stat_effects.append("Speed")
+                    self.stat_effect_nums.append(round(effect["m_speedMultiplier"] - 1, 2))
