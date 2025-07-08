@@ -28,6 +28,7 @@ DOT_TYPES = {
     487099: "Heal",
     490762: "Poison",
     490791: "Bleed",
+    1693022: "Poison",
 }
 
 class Power:
