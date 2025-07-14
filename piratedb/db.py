@@ -150,9 +150,6 @@ CREATE TABLE units (
     school              text,
     dmg_type            text,
     primary_stat        integer,
-    beast_flag          integer,
-    undead_flag         integer,
-    bird_flag           integer,
     curve               integer,
     kind                text,
 
@@ -188,6 +185,16 @@ CREATE TABLE unit_stats (
 );
 
 CREATE INDEX unit_stats_lookup ON unit_stats(unit);
+
+
+CREATE TABLE unit_tags (
+    id       integer not null primary key,
+    unit     integer not null,
+
+    tag      text,
+
+    foreign key(unit)   references units(id)
+);
 
 
 CREATE TABLE pets (
@@ -413,6 +420,7 @@ def insert_units(cursor, units):
     values = []
     stats = []
     talents = []
+    tags = []
 
     for unit in units:
         values.append((
@@ -424,9 +432,6 @@ def insert_units(cursor, units):
             unit.school,
             unit.damage_type,
             unit.primary_stat,
-            unit.beast,
-            unit.undead,
-            unit.bird,
             unit.curve,
             unit.unit_type
         ))
@@ -456,9 +461,15 @@ def insert_units(cursor, units):
                 1,
                 unit.power_sources[power]
             ))
+        
+        for tag in unit.flag_list:
+            tags.append((
+                unit.template_id,
+                tag
+            ))
 
     cursor.executemany(
-        "INSERT INTO units(id,name,real_name,image,title,school,dmg_type,primary_stat,beast_flag,undead_flag,bird_flag,curve,kind) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO units(id,name,real_name,image,title,school,dmg_type,primary_stat,curve,kind) VALUES (?,?,?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(
@@ -468,6 +479,10 @@ def insert_units(cursor, units):
     cursor.executemany(
         """INSERT INTO unit_talents(unit,type,talent,rank,source) VALUES (?,?,?,?,?)""",
         talents
+    )
+    cursor.executemany(
+        """INSERT INTO unit_tags(unit,tag) VALUES (?,?)""",
+        tags
     )
 
 

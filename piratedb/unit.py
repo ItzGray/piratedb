@@ -32,6 +32,7 @@ def is_unit_template(obj: dict) -> bool:
 
 sources = {0: "Unknown", 1: "Template", 2: "Trained"}
 MODIFIER_OPERATORS = {0: "Set", 1: "Set Add", 2: "Multiply Add", 3: "Multiply", 4: "Add"}
+valid_flags = [b"WB_Beast", b"WB_Undead", b"WB_Fowl", b"ADJ_AmberHorde", b"ADJ_Armada", b"ADJ_Cutthroat", b"ADJ_InoshishiBandit", b"ADJ_InoshishiWarlord", b"ADJ_NinjPig", b"ADJ_WharfRat", b"ADJ_Troggy", b"ADJ_TroggyArcher", b"ADJ_TroggyChief", b"ADJ_TroggyShaman", b"ADJ_TroggyWarrior", b"ADJ_Undead", b"ADJ_WaterMole", b"ADJ_WaterMole_Rebel", b"ADJ_Waponi", b"ADJ_Ophidian", b"ADJ_Vulture", b"ADJ_GNT_MR_Mob", b"ADJ_GNT_MR_Brute", b"ADJ_GNT_MR_Wailer", b"KTArmada", b"ADJ_Event_Boss", b"ADJ_Event_Base", b"ADJ_Event_Elite"]
 
 class Unit:
     def __init__(self, state: State, obj: dict):
@@ -43,15 +44,10 @@ class Unit:
         self.real_name = obj["m_objectName"]
         self.image = obj["m_sIcon"][0].split(b"/")[-1]
         adj_list = obj["m_adjectiveList"]
-        self.beast = False
-        self.undead = False
-        self.bird = False
-        if b"WB_Beast" in adj_list:
-            self.beast = True
-        if b"WB_Undead" in adj_list:
-            self.undead = True
-        if b"WB_Fowl" in adj_list:
-            self.bird = True
+        self.flag_list = []
+        for adj in adj_list:
+            if adj in valid_flags:
+                self.flag_list.append(adj)
 
         behaviors = obj["m_behaviors"]
         unit_behavior = None
