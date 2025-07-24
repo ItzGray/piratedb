@@ -17,6 +17,7 @@ class Talent:
         self.name = state.make_lang_key(obj)
         self.real_name = obj["m_objectName"]
         try:
+            self.vdf = obj["m_sIcon"][0].decode("utf-8")
             self.image = obj["m_sIcon"][0].split(b"/")[-1]
         except:
             self.image = ""

@@ -33,7 +33,7 @@ class Pet:
         behaviors = obj["m_behaviors"]
         pet_behavior = None
         item_behavior = None
-
+        visual_behavior = None
         for behavior in behaviors:
             if behavior == None:
                 continue
@@ -45,6 +45,30 @@ class Pet:
                 case b'ItemBehavior':
                     item_behavior = behavior
 
+                case b'VisualBehavior':
+                    visual_behavior = behavior
+
+        self.vdf = ""
+        self.vdf_type = ""
+        if visual_behavior != None:
+            if visual_behavior["m_sVisualDefinitionFile"] != b"":
+                self.vdf = visual_behavior["m_sVisualDefinitionFile"].decode("utf-8")
+                self.image = visual_behavior["m_sVisualDefinitionFile"].split(b"/")[-1]
+                self.vdf_type = "VDF"
+            else:
+                try:
+                    self.vdf = obj["m_sIcon"][0].decode("utf-8")
+                    self.image = obj["m_sIcon"][0].split(b"/")[-1]
+                    self.vdf_type = "Image"
+                except:
+                    self.image = ""
+        else:
+            try:
+                self.vdf = obj["m_sIcon"][0].decode("utf-8")
+                self.image = obj["m_sIcon"][0].split(b"/")[-1]
+                self.vdf_type = "Image"
+            except:
+                self.image = ""
         self.max_guts = pet_behavior["m_nMaxGuts"]
         self.max_guile = pet_behavior["m_nMaxGuile"]
         self.max_grit = pet_behavior["m_nMaxGrit"]

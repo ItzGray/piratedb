@@ -265,6 +265,12 @@ CREATE TABLE indiv_pet_powers (
 
 CREATE INDEX indiv_pet_power_lookup ON indiv_pet_powers(pet);
 
+CREATE TABLE vdfs (
+    id      integer not null primary key,
+    type    text,
+    vdf     text
+);
+
 """
 
 
@@ -272,7 +278,7 @@ def _progress(_status, remaining, total):
     print(f'Copied {total-remaining} of {total} pages...')
 
 
-def build_db(state, curves, items, units, pets, talents, powers, pet_talents, pet_powers, out):
+def build_db(state, curves, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs, out):
     mem = sqlite3.connect(":memory:")
     cursor = mem.cursor()
 
@@ -286,6 +292,7 @@ def build_db(state, curves, items, units, pets, talents, powers, pet_talents, pe
     insert_powers(cursor, powers)
     insert_pet_talents(cursor, pet_talents)
     insert_pet_powers(cursor, pet_powers)
+    insert_vdfs(cursor, vdfs)
     mem.commit()
 
     with out:
@@ -835,5 +842,19 @@ def insert_pet_powers(cursor, pet_powers):
 
     cursor.executemany(
         "INSERT INTO pet_powers(id,name,real_name,image,is_grant,rarity,power) VALUES (?,?,?,?,?,?,?)",
+        values
+    )
+
+def insert_vdfs(cursor, vdfs):
+    values = []
+
+    for vdf in vdfs:
+        values.append((
+            vdf[0],
+            vdf[1]
+        ))
+
+    cursor.executemany(
+        "INSERT INTO vdfs(type,vdf) VALUES (?,?)",
         values
     )

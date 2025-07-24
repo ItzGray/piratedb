@@ -94,15 +94,13 @@ class Item:
         if self.name.id == 5966405564772825542:
             self.name = state.make_lang_key({"m_displayName": b""})
         self.real_name = obj["m_objectName"]
-        try:
-            self.image = obj["m_sIcon"][0].split(b"/")[-1]
-        except:
-            self.image = ""
+        self.image = ""
         adj_list = obj["m_adjectiveList"]
 
         behaviors = obj["m_behaviors"]
         item_behavior = None
         equippable_behavior = None
+        visual_behavior = None
         for behavior in behaviors:
             if behavior == None:
                 continue
@@ -113,8 +111,32 @@ class Item:
                 
                 case b'EquippableBehavior':
                     equippable_behavior = behavior
+
+                case b'VisualBehavior':
+                    visual_behavior = behavior
         
         self.item_flags = item_behavior["m_itemFlags"]
+        self.vdf = ""
+        self.vdf_type = ""
+        if visual_behavior != None:
+            if visual_behavior["m_sVisualDefinitionFile"] != b"":
+                self.vdf = visual_behavior["m_sVisualDefinitionFile"].decode("utf-8")
+                self.image = visual_behavior["m_sVisualDefinitionFile"].split(b"/")[-1]
+                self.vdf_type = "VDF"
+            else:
+                try:
+                    self.vdf = obj["m_sIcon"][0].decode("utf-8")
+                    self.image = obj["m_sIcon"][0].split(b"/")[-1]
+                    self.vdf_type = "Image"
+                except:
+                    self.image = ""
+        else:
+            try:
+                self.vdf = obj["m_sIcon"][0].decode("utf-8")
+                self.image = obj["m_sIcon"][0].split(b"/")[-1]
+                self.vdf_type = "Image"
+            except:
+                self.image = ""
         self.item_type = None
         self.weapon_type = ""
         for adj in adj_list:

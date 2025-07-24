@@ -42,7 +42,7 @@ class Unit:
         if self.name.id == None:
             self.name = self.suffix
         self.real_name = obj["m_objectName"]
-        self.image = obj["m_sIcon"][0].split(b"/")[-1]
+        self.image = ""
         adj_list = obj["m_adjectiveList"]
         self.flag_list = []
         for adj in adj_list:
@@ -54,6 +54,7 @@ class Unit:
         talent_behavior = None
         power_behavior = None
         mob_army_behavior = None
+        visual_behavior = None
         for behavior in behaviors:
             if behavior == None:
                 continue
@@ -76,7 +77,31 @@ class Unit:
 
                 case b'MobArmyBehavior':
                     mob_army_behavior = behavior
+
+                case b'VisualBehavior':
+                    visual_behavior = behavior
         
+        self.vdf = ""
+        self.vdf_type = ""
+        if visual_behavior != None:
+            if visual_behavior["m_sVisualDefinitionFile"] != b"":
+                self.vdf = visual_behavior["m_sVisualDefinitionFile"].decode("utf-8")
+                self.image = visual_behavior["m_sVisualDefinitionFile"].split(b"/")[-1]
+                self.vdf_type = "VDF"
+            else:
+                try:
+                    self.vdf = obj["m_sIcon"][0].decode("utf-8")
+                    self.image = obj["m_sIcon"][0].split(b"/")[-1]
+                    self.vdf_type = "Image"
+                except:
+                    self.image = ""
+        else:
+            try:
+                self.vdf = obj["m_sIcon"][0].decode("utf-8")
+                self.image = obj["m_sIcon"][0].split(b"/")[-1]
+                self.vdf_type = "Image"
+            except:
+                self.image = ""
         self.curve = unit_behavior["m_classId"]
         self.school = find_school_tid(MANIFEST, unit_behavior["m_classId"])
         self.damage_type = STATS[unit_behavior["m_nDamageType"]]
