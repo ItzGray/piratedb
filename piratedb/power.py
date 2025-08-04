@@ -289,7 +289,7 @@ class Power:
             elif result.type_hash == djb2("class ResActivateAbility"):
                 self.result_types.append(7)
                 self.ability_ids.append(result["m_nAbilityID"])
-
+            
             elif result.type_hash == djb2("class ResApplyHeal"):
                 self.result_types.append(8)
                 heal_adjustments = result["m_pAdjustments"]
@@ -298,11 +298,13 @@ class Power:
                     try:
                         stat = STATS[adjustment["m_sStatName"]]
                     except:
-                        continue
-                    else:
                         if adjustment.type_hash == djb2("class RPSValueAdjustment"):
-                            # Handle this later
-                            continue
+                            denominator = adjustment["m_pDenominator"]
+                            numerator = adjustment["m_pNumerator"]
+                            adjustment_stats.append(STATS[numerator["m_stat"]])
+                            adjustment_operators.append("Divide")
+                            adjustment_values.append(STATS[denominator["m_stat"]])
+                    else:
                         rounded_val = round(adjustment["m_fValue"], 3)
                         if rounded_val != 0:
                             adjustment_stats.append(stat)
