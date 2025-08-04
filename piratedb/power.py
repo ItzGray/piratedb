@@ -304,6 +304,8 @@ class Power:
                             adjustment_stats.append(STATS[numerator["m_stat"]])
                             adjustment_operators.append("Divide")
                             adjustment_values.append(STATS[denominator["m_stat"]])
+                        else:
+                            continue
                     else:
                         rounded_val = round(adjustment["m_fValue"], 3)
                         if rounded_val != 0:
