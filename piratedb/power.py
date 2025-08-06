@@ -54,6 +54,29 @@ class Power:
                      
         self.pvp_tag = combat_ability_behavior["m_allowedIn"]
         self.target_type = combat_ability_behavior["m_targetType"]
+        target_style_block = combat_ability_behavior["m_pTargetStyle"]
+        try:
+            if target_style_block.type_hash == djb2("class CombatAbilityTargetStyleTeam"):
+                self.target_style = "Full Team"
+            elif target_style_block.type_hash == djb2("class CombatAbilityTargetStyleSingle"):
+                self.target_style = "Single Target"
+            elif target_style_block.type_hash == djb2("class CombatAbilityTargetStyleCardinal"):
+                self.target_style = "Cardinal"
+            elif target_style_block.type_hash == djb2("class CombatAbilityTargetStyleRadial"):
+                self.target_style = "Radial"
+            elif target_style_block.type_hash == djb2("class CombatAbilityTargetStyleCone"):
+                self.target_style = "Cone"
+            elif target_style_block.type_hash == djb2("class CombatAbilityTargetStyleLine"):
+                self.target_style = "Line"
+            elif target_style_block.type_hash == djb2("class CombatAbilityTargetStyleOrdinal"):
+                self.target_style = "Ordinal"
+            elif target_style_block.type_hash == djb2("class CombatAbilityTargetStyleWall"):
+                self.target_style = "Wall"
+            else:
+                self.target_style = "Unknown"
+        except:
+            self.target_style = "Unknown"                     
+        
         target_results = combat_ability_behavior["m_targetResults"]
         results = target_results["m_results"]
 
@@ -156,7 +179,14 @@ class Power:
                     try:
                         stat = STATS[adjustment["m_sStatName"]]
                     except:
-                        continue
+                        if adjustment.type_hash == djb2("class RPSValueAdjustment"):
+                            denominator = adjustment["m_pDenominator"]
+                            numerator = adjustment["m_pNumerator"]
+                            adjustment_stats.append(STATS[numerator["m_stat"]])
+                            adjustment_operators.append("Divide")
+                            adjustment_values.append(STATS[denominator["m_stat"]])
+                        else:
+                            continue
                     else:
                         rounded_val = round(adjustment["m_fValue"], 3)
                         if rounded_val != 0:

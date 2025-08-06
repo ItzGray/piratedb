@@ -106,6 +106,7 @@ class Unit:
         self.school = find_school_tid(MANIFEST, unit_behavior["m_classId"])
         self.damage_type = STATS[unit_behavior["m_nDamageType"]]
         self.primary_stat = unit_behavior["m_nPrimaryStat"]
+        self.primary_attack = unit_behavior["m_nPrimaryAttack"]
         self.stat_modifiers = []
         self.stat_modifier_values = []
         self.stat_modifier_operators = []

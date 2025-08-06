@@ -63,6 +63,7 @@ CREATE TABLE powers (
     description     integer,
     pvp_tag         integer,
     target_type     integer,
+    target_style    text,
 
     foreign key(name)   references locale_en(id)
     foreign key(description)    references locale_en(id)
@@ -152,6 +153,7 @@ CREATE TABLE units (
     primary_stat        integer,
     curve               integer,
     kind                text,
+    primary_attack      integer,
 
     foreign key(name)   references locale_en(id)
     foreign key(title)  references locale_en(id)
@@ -440,7 +442,8 @@ def insert_units(cursor, units):
             unit.damage_type,
             unit.primary_stat,
             unit.curve,
-            unit.unit_type
+            unit.unit_type,
+            unit.primary_attack
         ))
 
         for stat in range(len(unit.stat_modifiers)):
@@ -476,7 +479,7 @@ def insert_units(cursor, units):
             ))
 
     cursor.executemany(
-        "INSERT INTO units(id,name,real_name,image,title,school,dmg_type,primary_stat,curve,kind) VALUES (?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO units(id,name,real_name,image,title,school,dmg_type,primary_stat,curve,kind,primary_attack) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(
@@ -603,7 +606,8 @@ def insert_powers(cursor, powers):
             power.image,
             power.description.id,
             power.pvp_tag,
-            power.target_type
+            power.target_type,
+            power.target_style
         ))
 
         counts = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -796,7 +800,7 @@ def insert_powers(cursor, powers):
             counts[type] += 1
     
     cursor.executemany(
-        "INSERT INTO powers(id,name,real_name,image,description,pvp_tag,target_type) VALUES (?,?,?,?,?,?,?)",
+        "INSERT INTO powers(id,name,real_name,image,description,pvp_tag,target_type,target_style) VALUES (?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(
