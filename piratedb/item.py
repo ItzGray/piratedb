@@ -185,6 +185,8 @@ class Item:
                         elif _is_talent_req(req):
                             self.talent_req = req["m_nTalentId"]
                             self.talent_req_rank = req["m_nMinimumRank"]
+            if self.school_req == None:
+                self.school_req = "Any"
             self.stat_effects = []
             self.stat_effect_nums = []
             self.talent_effects = []
