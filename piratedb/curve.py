@@ -26,10 +26,25 @@ CURVE_STATS = [
     "Epic Talent Slots",
 ]
 
+CURVE_CLASSES = {
+    b"category_cleric": "Privateer",
+    b"category_fighter": "Buccaneer",
+    b"category_wizard": "Witchdoctor",
+    b"category_thief": "Swashbuckler",
+    b"category_ranged": "Musketeer",
+}
+
 class Curve:
     def __init__(self, state: State, obj: dict):
         self.template_id = obj["m_templateID"]
         self.real_name = obj["m_objectName"]
+
+        adjective_list = obj["m_adjectiveList"]
+        self.school = "Universal"
+        for adj in adjective_list:
+            if adj in CURVE_CLASSES:
+                self.school = CURVE_CLASSES[adj]
+                break
 
         attributes = obj["m_attributes"]
         self.curve_points = []
@@ -54,3 +69,37 @@ class Curve:
                         continue
                     self.curve_bonus_points.append((bonus["m_level"], bonus["m_value"]))
                     self.curve_bonus_stats.append(stat)
+        
+        behaviors = obj["m_behaviors"]
+        talent_behavior = None
+        power_behavior = None
+        for behavior in behaviors:
+            if behavior == None:
+                continue
+            
+            match behavior["m_behaviorName"]:
+                case b'PowerBehavior':
+                    power_behavior = behavior
+                
+                case b'PowerBehaviorServer':
+                    power_behavior = behavior
+                
+                case b'TalentBehavior':
+                    talent_behavior = behavior
+                
+                case b'TalentBehaviorServer':
+                    talent_behavior = behavior
+        self.power_list = []
+        self.power_sources = []
+        if power_behavior != None:
+            for power in power_behavior["m_powerData"]:
+                self.power_list.append(power["m_powerID"])
+                self.power_sources.append(power["m_source"])
+        self.talent_list = []
+        self.talent_sources = []
+        self.talent_ranks = []
+        if talent_behavior != None:
+            for talent in talent_behavior["m_talents"]:
+                self.talent_list.append(talent["m_talentID"])
+                self.talent_sources.append(talent["m_source"])
+                self.talent_ranks.append(talent["m_rank"])

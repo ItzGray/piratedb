@@ -12,7 +12,8 @@ CREATE INDEX en_name_lookup ON locale_en(data);
 
 CREATE TABLE curves (
     id                 integer not null primary key,
-    real_name          text
+    real_name          text,
+    school             text
 );
 
 CREATE TABLE curve_points (
@@ -23,6 +24,16 @@ CREATE TABLE curve_points (
     type               text,
     level              integer,
     value              integer
+);
+
+CREATE TABLE curve_abilities (
+    id                 integer not null primary key,
+    curve              integer not null,
+    ability            text,
+
+    ability_type       text,
+    level              integer,
+    source             integer
 );
 
 CREATE TABLE items (
@@ -154,6 +165,7 @@ CREATE TABLE units (
     curve               integer,
     kind                text,
     primary_attack      integer,
+    has_power_behavior  integer,
 
     foreign key(name)   references locale_en(id)
     foreign key(title)  references locale_en(id)
@@ -319,11 +331,13 @@ def insert_locale_data(cursor, cache: LangCache):
 def insert_curves(cursor, curves):
     values = []
     points = []
+    abilities = []
 
     for curve in curves:
         values.append((
             curve.template_id,
-            curve.real_name
+            curve.real_name,
+            curve.school
         ))
 
         for point in range(len(curve.curve_points)):
@@ -344,14 +358,37 @@ def insert_curves(cursor, curves):
                 curve.curve_bonus_points[bonus][1]
             ))
         
+        for power in range(len(curve.power_list)):
+            abilities.append((
+                curve.template_id,
+                curve.power_list[power],
+                "Power",
+                -1,
+                curve.power_sources[power]
+            ))
+        
+        for talent in range(len(curve.talent_list)):
+            abilities.append((
+                curve.template_id,
+                curve.talent_list[talent],
+                "Talent",
+                curve.talent_ranks[talent],
+                curve.talent_sources[talent]
+            ))
+        
     cursor.executemany(
-        """INSERT INTO curves(id,real_name) VALUES (?,?)""",
+        """INSERT INTO curves(id,real_name,school) VALUES (?,?,?)""",
         values
     )
 
     cursor.executemany(
         """INSERT INTO curve_points(curve,stat,type,level,value) VALUES (?,?,?,?,?)""",
         points
+    )
+
+    cursor.executemany(
+        """INSERT INTO curve_abilities(curve,ability,ability_type,level,source) VALUES (?,?,?,?,?)""",
+        abilities
     )
 
 def insert_items(cursor, items):
@@ -443,7 +480,8 @@ def insert_units(cursor, units):
             unit.primary_stat,
             unit.curve,
             unit.unit_type,
-            unit.primary_attack
+            unit.primary_attack,
+            unit.has_power_behavior
         ))
 
         for stat in range(len(unit.stat_modifiers)):
@@ -479,7 +517,7 @@ def insert_units(cursor, units):
             ))
 
     cursor.executemany(
-        "INSERT INTO units(id,name,real_name,image,title,school,dmg_type,primary_stat,curve,kind,primary_attack) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO units(id,name,real_name,image,title,school,dmg_type,primary_stat,curve,kind,primary_attack,has_power_behavior) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(

@@ -101,6 +101,12 @@ TYPES = ROOT / "types.json"
 de = BinDeserializer(ROOT_WAD, TYPES)
 MANIFEST = de.deserialize_from_path("TemplateManifest.xml")
 
+def get_curve_class(id: str, curves: list) -> str:
+    for curve in curves:
+        if curve.template_id == int(id):
+            return curve.school
+    return "Universal"
+
 def op_to_dict(type_list: TypeList, v):
     if isinstance(v, LazyObject):
         lazy_dict = {k: op_to_dict(type_list, e) for k, e in v.items(type_list)}

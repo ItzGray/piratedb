@@ -30,7 +30,7 @@ def deserialize_files(state: State):
     pet_talents = []
     pet_powers = []
     vdfs = []
-                
+
     for file in state.de.archive.iter_glob("ObjectData/**/*.xml"):
         obj = state.de.deserialize_from_path(file)
 
@@ -40,7 +40,13 @@ def deserialize_files(state: State):
         if is_curve_template(obj):
             curve = Curve(state, obj)
             curves.append(curve)
+                
+    for file in state.de.archive.iter_glob("ObjectData/**/*.xml"):
+        obj = state.de.deserialize_from_path(file)
 
+        if obj == None:
+            continue
+        
         if is_item_template(obj):
             item = Item(state, obj)
             if item.vdf != "" and (item.vdf_type, item.vdf) not in vdfs:
@@ -48,7 +54,7 @@ def deserialize_files(state: State):
             items.append(item)
 
         if is_unit_template(obj):
-            unit = Unit(state, obj)
+            unit = Unit(state, obj, curves)
             if unit.vdf != "" and (unit.vdf_type, unit.vdf) not in vdfs:
                 vdfs.append((unit.vdf_type, unit.vdf))
             units.append(unit)

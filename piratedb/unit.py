@@ -1,6 +1,6 @@
 from .state import State
-from .utils import STATS, MANIFEST
-from .tid_find import find_school_tid
+from .utils import STATS, MANIFEST, get_curve_class
+from .curve import Curve
 
 ATTACK_TYPES = {208075: "Melee", 208076: "Ranged", 732086: "Staff"}
 
@@ -35,7 +35,7 @@ MODIFIER_OPERATORS = {0: "Set", 1: "Set Add", 2: "Multiply Add", 3: "Multiply", 
 valid_flags = [b"WB_Beast", b"WB_Undead", b"WB_Fowl", b"ADJ_AmberHorde", b"ADJ_Armada", b"ADJ_Cutthroat", b"ADJ_InoshishiBandit", b"ADJ_InoshishiWarlord", b"ADJ_NinjPig", b"ADJ_WharfRat", b"ADJ_Troggy", b"ADJ_TroggyArcher", b"ADJ_TroggyChief", b"ADJ_TroggyShaman", b"ADJ_TroggyWarrior", b"ADJ_Undead", b"ADJ_WaterMole", b"ADJ_WaterMole_Rebel", b"ADJ_Waponi", b"ADJ_Ophidian", b"ADJ_Vulture", b"ADJ_GNT_MR_Mob", b"ADJ_GNT_MR_Brute", b"ADJ_GNT_MR_Wailer", b"KTArmada", b"ADJ_Event_Boss", b"ADJ_Event_Base", b"ADJ_Event_Elite"]
 
 class Unit:
-    def __init__(self, state: State, obj: dict):
+    def __init__(self, state: State, obj: dict, curves: list[Curve]):
         self.template_id = obj["m_templateID"]
         self.name = state.make_unit_lang_key(obj)
         self.suffix = state.make_lang_key(obj)
@@ -55,6 +55,7 @@ class Unit:
         power_behavior = None
         mob_army_behavior = None
         visual_behavior = None
+        self.has_power_behavior = False
         for behavior in behaviors:
             if behavior == None:
                 continue
@@ -80,7 +81,8 @@ class Unit:
 
                 case b'VisualBehavior':
                     visual_behavior = behavior
-        
+        if power_behavior != None:
+            self.has_power_behavior = True
         self.vdf = ""
         self.vdf_type = ""
         if visual_behavior != None:
@@ -103,7 +105,7 @@ class Unit:
             except:
                 self.image = ""
         self.curve = unit_behavior["m_classId"]
-        self.school = find_school_tid(MANIFEST, unit_behavior["m_classId"])
+        self.school = get_curve_class(self.curve, curves)
         self.damage_type = STATS[unit_behavior["m_nDamageType"]]
         self.primary_stat = unit_behavior["m_nPrimaryStat"]
         self.primary_attack = unit_behavior["m_nPrimaryAttack"]
