@@ -36,6 +36,12 @@ CREATE TABLE curve_abilities (
     source             integer
 );
 
+CREATE TABLE factions (
+    id                 integer not null primary key,
+    faction_key        text,
+    gendered           integer
+);
+
 CREATE TABLE items (
     id                 integer not null primary key,
     name               integer,
@@ -159,6 +165,8 @@ CREATE TABLE units (
     image               text,
 
     title               integer,
+    gender              text,
+    faction             integer,
     school              text,
     dmg_type            text,
     primary_stat        integer,
@@ -292,13 +300,14 @@ def _progress(_status, remaining, total):
     print(f'Copied {total-remaining} of {total} pages...')
 
 
-def build_db(state, curves, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs, out):
+def build_db(state, curves, factions, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs, out):
     mem = sqlite3.connect(":memory:")
     cursor = mem.cursor()
 
     initialize(cursor)
     insert_locale_data(cursor, state.cache)
     insert_curves(cursor, curves)
+    insert_factions(cursor, factions)
     insert_items(cursor, items)
     insert_units(cursor, units)
     insert_pets(cursor, pets)
@@ -391,6 +400,21 @@ def insert_curves(cursor, curves):
         abilities
     )
 
+def insert_factions(cursor, factions):
+    values = []
+
+    for faction in factions:
+        values.append((
+            faction.template_id,
+            faction.faction_key,
+            faction.gender_check
+        ))
+    
+    cursor.executemany(
+        "INSERT INTO factions(id,faction_key,gendered) VALUES (?,?,?)",
+        values
+    )
+
 def insert_items(cursor, items):
     values = []
     stats = []
@@ -475,6 +499,8 @@ def insert_units(cursor, units):
             unit.real_name,
             unit.image,
             unit.suffix.id,
+            unit.gender,
+            unit.faction,
             unit.school,
             unit.damage_type,
             unit.primary_stat,
@@ -517,7 +543,7 @@ def insert_units(cursor, units):
             ))
 
     cursor.executemany(
-        "INSERT INTO units(id,name,real_name,image,title,school,dmg_type,primary_stat,curve,kind,primary_attack,has_power_behavior) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO units(id,name,real_name,image,title,gender,faction,school,dmg_type,primary_stat,curve,kind,primary_attack,has_power_behavior) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(

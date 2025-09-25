@@ -3,6 +3,7 @@ from .utils import STATS, MANIFEST, get_curve_class
 from .curve import Curve
 
 ATTACK_TYPES = {208075: "Melee", 208076: "Ranged", 732086: "Staff"}
+GENDERS = {0: "Female", 1: "Male", 2: "Neutral"}
 
 def is_unit_template(obj: dict) -> bool:
     try:
@@ -106,6 +107,8 @@ class Unit:
                 self.image = ""
         self.curve = unit_behavior["m_classId"]
         self.school = get_curve_class(self.curve, curves)
+        self.gender = GENDERS[unit_behavior["m_eGender"]]
+        self.faction = unit_behavior["m_factionTemplateID"]
         self.damage_type = STATS[unit_behavior["m_nDamageType"]]
         self.primary_stat = unit_behavior["m_nPrimaryStat"]
         self.primary_attack = unit_behavior["m_nPrimaryAttack"]

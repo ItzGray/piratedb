@@ -6,6 +6,7 @@ import time
 
 from .db import build_db
 from .curve import Curve, is_curve_template
+from .faction import Faction, is_faction_template
 from .item import Item, is_item_template
 from .unit import Unit, is_unit_template
 from .pet import Pet, is_pet_template
@@ -22,6 +23,7 @@ LOCALE = "Locale/English"
 
 def deserialize_files(state: State):
     curves = []
+    factions = []
     items = []
     units = []
     pets = []
@@ -40,6 +42,16 @@ def deserialize_files(state: State):
         if is_curve_template(obj):
             curve = Curve(state, obj)
             curves.append(curve)
+    
+    for file in state.de.archive.iter_glob("Factions/**/*.xml"):
+        obj = state.de.deserialize_from_path(file)
+
+        if obj == None:
+            continue
+
+        if is_faction_template(obj):
+            faction = Faction(state, obj)
+            factions.append(faction)
                 
     for file in state.de.archive.iter_glob("ObjectData/**/*.xml"):
         obj = state.de.deserialize_from_path(file)
@@ -91,19 +103,19 @@ def deserialize_files(state: State):
                 vdfs.append(("Image", power.vdf))
             powers.append(power)
 
-    return curves, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs
+    return curves, factions, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs
 
 def main():
     start = time.time()
     
     state = State(ROOT_WAD, TYPES)
-    curves, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs = deserialize_files(state)
+    curves, factions, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs = deserialize_files(state)
 
     if ITEMS_DB.exists():
         ITEMS_DB.unlink()
 
     db = sqlite3.connect(str(ITEMS_DB))
-    build_db(state, curves, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs, db)
+    build_db(state, curves, factions, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs, db)
     db.close()
 
     print(f"Success! Database written to {ITEMS_DB.absolute()} in {round(time.time() - start, 2)} seconds")
