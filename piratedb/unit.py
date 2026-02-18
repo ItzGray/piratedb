@@ -86,10 +86,12 @@ class Unit:
             self.has_power_behavior = True
         self.vdf = ""
         self.vdf_type = ""
+        self.fallback_icon = ""
         if visual_behavior != None:
             if visual_behavior["m_sVisualDefinitionFile"] != b"":
                 self.vdf = visual_behavior["m_sVisualDefinitionFile"].decode("utf-8")
                 self.image = visual_behavior["m_sVisualDefinitionFile"].split(b"/")[-1]
+                self.fallback_icon = obj["m_sIcon"][0].decode("utf-8")
                 self.vdf_type = "VDF"
             else:
                 try:

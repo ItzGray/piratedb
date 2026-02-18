@@ -290,7 +290,8 @@ CREATE INDEX indiv_pet_power_lookup ON indiv_pet_powers(pet);
 CREATE TABLE vdfs (
     id      integer not null primary key,
     type    text,
-    vdf     text
+    vdf     text,
+    fallback_icon text
 );
 
 """
@@ -919,10 +920,11 @@ def insert_vdfs(cursor, vdfs):
     for vdf in vdfs:
         values.append((
             vdf[0],
-            vdf[1]
+            vdf[1],
+            vdf[2]
         ))
 
     cursor.executemany(
-        "INSERT INTO vdfs(type,vdf) VALUES (?,?)",
+        "INSERT INTO vdfs(type,vdf,fallback_icon) VALUES (?,?,?)",
         values
     )

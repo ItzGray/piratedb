@@ -61,20 +61,20 @@ def deserialize_files(state: State):
         
         if is_item_template(obj):
             item = Item(state, obj)
-            if item.vdf != "" and (item.vdf_type, item.vdf) not in vdfs:
-                vdfs.append((item.vdf_type, item.vdf))
+            if item.vdf != "" and (item.vdf_type, item.vdf, item.fallback_icon) not in vdfs:
+                vdfs.append((item.vdf_type, item.vdf, item.fallback_icon))
             items.append(item)
 
         if is_unit_template(obj):
             unit = Unit(state, obj, curves)
-            if unit.vdf != "" and (unit.vdf_type, unit.vdf) not in vdfs:
-                vdfs.append((unit.vdf_type, unit.vdf))
+            if unit.vdf != "" and (unit.vdf_type, unit.vdf, unit.fallback_icon) not in vdfs:
+                vdfs.append((unit.vdf_type, unit.vdf, unit.fallback_icon))
             units.append(unit)
 
         if is_pet_template(obj):
             pet = Pet(state, obj)
-            if pet.vdf != "" and (pet.vdf_type, pet.vdf) not in vdfs:
-                vdfs.append((unit.vdf_type, pet.vdf))
+            if pet.vdf != "" and (pet.vdf_type, pet.vdf, pet.fallback_icon) not in vdfs:
+                vdfs.append((pet.vdf_type, pet.vdf, pet.fallback_icon))
             pets.append(pet)
 
         if is_pet_talent_template(obj):
@@ -90,8 +90,8 @@ def deserialize_files(state: State):
 
         if is_talent_template(obj):
             talent = Talent(state, obj)
-            if talent.image != "" and ("Image", talent.vdf) not in vdfs:
-                vdfs.append(("Image", talent.vdf))
+            if talent.image != "" and ("Image", talent.vdf, "") not in vdfs:
+                vdfs.append(("Image", talent.vdf, ""))
             talents.append(talent)
     
     for file in state.de.archive.iter_glob("Abilities/*.xml"):
@@ -99,8 +99,8 @@ def deserialize_files(state: State):
 
         if is_power_template(obj):
             power = Power(state, obj)
-            if power.image != "" and ("Image", power.vdf) not in vdfs:
-                vdfs.append(("Image", power.vdf))
+            if power.image != "" and ("Image", power.vdf, "") not in vdfs:
+                vdfs.append(("Image", power.vdf, ""))
             powers.append(power)
 
     return curves, factions, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs
