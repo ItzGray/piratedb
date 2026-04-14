@@ -128,3 +128,14 @@ class RankTooltipLangKey:
         self.id = cache.find_entry(key)
         if self.id is None:
             return
+
+class OtherLangKey:
+    def __init__(self, cache: LangCache, text: bytes):
+        key = text
+        if key == b"":
+            self.id = None
+            return
+
+        self.id = cache.find_entry(key)
+        if self.id is None:
+            return

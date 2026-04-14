@@ -100,6 +100,7 @@ TYPES = ROOT / "types.json"
 
 de = BinDeserializer(ROOT_WAD, TYPES)
 MANIFEST = de.deserialize_from_path("TemplateManifest.xml")
+CHARACTER_NAMES = de.deserialize_from_path("CharacterNames.xml")
 
 def get_curve_class(id: str, curves: list) -> str:
     for curve in curves:

@@ -10,6 +10,15 @@ INIT_QUERIES = """CREATE TABLE locale_en (
 
 CREATE INDEX en_name_lookup ON locale_en(data);
 
+CREATE TABLE random_names (
+    id      integer not null primary key,
+    name    integer,
+    faction integer,
+    type    text,
+    
+    foreign key(name)   references locale_en(id)
+);
+
 CREATE TABLE curves (
     id                 integer not null primary key,
     real_name          text,
@@ -39,7 +48,8 @@ CREATE TABLE curve_abilities (
 CREATE TABLE factions (
     id                 integer not null primary key,
     faction_key        text,
-    gendered           integer
+    gendered           integer,
+    no_random_names    integer
 );
 
 CREATE TABLE items (
@@ -174,6 +184,7 @@ CREATE TABLE units (
     kind                text,
     primary_attack      integer,
     has_power_behavior  integer,
+    is_random_name      integer,
 
     foreign key(name)   references locale_en(id)
     foreign key(title)  references locale_en(id)
@@ -403,17 +414,45 @@ def insert_curves(cursor, curves):
 
 def insert_factions(cursor, factions):
     values = []
+    random_names = []
 
     for faction in factions:
         values.append((
             faction.template_id,
             faction.faction_key,
-            faction.gender_check
+            faction.gender_check,
+            faction.no_names
         ))
+
+        for name in faction.unit_names["FirstNames"]:
+            random_names.append((
+                name.id,
+                faction.template_id,
+                "FirstNames"
+            ))
+        
+        for name in faction.unit_names["LastNames"]:
+            random_names.append((
+                name.id,
+                faction.template_id,
+                "LastNames"
+            ))
+        
+        for name in faction.unit_names["Articles"]:
+            random_names.append((
+                name.id,
+                faction.template_id,
+                "Articles"
+            ))
     
     cursor.executemany(
-        "INSERT INTO factions(id,faction_key,gendered) VALUES (?,?,?)",
+        "INSERT INTO factions(id,faction_key,gendered,no_random_names) VALUES (?,?,?,?)",
         values
+    )
+
+    cursor.executemany(
+        "INSERT INTO random_names(name,faction,type) VALUES (?,?,?)",
+        random_names
     )
 
 def insert_items(cursor, items):
@@ -508,7 +547,8 @@ def insert_units(cursor, units):
             unit.curve,
             unit.unit_type,
             unit.primary_attack,
-            unit.has_power_behavior
+            unit.has_power_behavior,
+            unit.is_random_name
         ))
 
         for stat in range(len(unit.stat_modifiers)):
@@ -544,7 +584,7 @@ def insert_units(cursor, units):
             ))
 
     cursor.executemany(
-        "INSERT INTO units(id,name,real_name,image,title,gender,faction,school,dmg_type,primary_stat,curve,kind,primary_attack,has_power_behavior) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO units(id,name,real_name,image,title,gender,faction,school,dmg_type,primary_stat,curve,kind,primary_attack,has_power_behavior,is_random_name) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         values
     )
     cursor.executemany(
