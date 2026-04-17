@@ -15,6 +15,7 @@ CREATE TABLE random_names (
     name    integer,
     faction integer,
     type    text,
+    gender  text,
     
     foreign key(name)   references locale_en(id)
 );
@@ -426,23 +427,26 @@ def insert_factions(cursor, factions):
 
         for name in faction.unit_names["FirstNames"]:
             random_names.append((
-                name.id,
+                name[0].id,
                 faction.template_id,
-                "FirstNames"
+                "FirstNames",
+                name[1]
             ))
         
         for name in faction.unit_names["LastNames"]:
             random_names.append((
                 name.id,
                 faction.template_id,
-                "LastNames"
+                "LastNames",
+                "Neutral"
             ))
         
         for name in faction.unit_names["Articles"]:
             random_names.append((
                 name.id,
                 faction.template_id,
-                "Articles"
+                "Articles",
+                "Neutral"
             ))
     
     cursor.executemany(
@@ -451,7 +455,7 @@ def insert_factions(cursor, factions):
     )
 
     cursor.executemany(
-        "INSERT INTO random_names(name,faction,type) VALUES (?,?,?)",
+        "INSERT INTO random_names(name,faction,type,gender) VALUES (?,?,?,?)",
         random_names
     )
 

@@ -38,13 +38,23 @@ class Faction:
                 key_search_2 += "_Female"
             key_search_1 = key_search_1.encode("utf-8")
             key_search_2 = key_search_2.encode("utf-8")
+            name_count = 0
             for name_list in name_table:
                 if name_list["first"] == key_search_1 or name_list["first"] == key_search_2:
                     second = name_list["second"]
                     lang_section = second["m_langSection"]
                     for name in second["m_names"]:
-                        self.unit_names["FirstNames"].append(state.make_other_lang_key((lang_section + b"_" + name)))
-                    break
+                        self.unit_names["FirstNames"].append([state.make_other_lang_key((lang_section + b"_" + name))])
+                        if key_search_1 != key_search_2:
+                            if name_list["first"] == key_search_1:
+                                self.unit_names["FirstNames"][-1].append("Male")
+                            elif name_list["first"] == key_search_2:
+                                self.unit_names["FirstNames"][-1].append("Female")
+                        else:
+                            self.unit_names["FirstNames"][-1].append("Neutral")
+                    name_count += 1
+                    if name_count >= 2 or (name_count >= 1 and key_search_1 == key_search_2):
+                        break
         
         if self.unit_last_names_check:
             key_search = f"{self.faction_key.decode("utf-8")}_Unit_LastNames".encode("utf-8")
