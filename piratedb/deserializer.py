@@ -9,7 +9,6 @@ class BinDeserializer:
         opts.flags = 1
         opts.shallow = False
         opts.skip_unknown_types = True
-        opts.djb2_only = True
         
         self.archive = Archive.mmap(root_wad)
         

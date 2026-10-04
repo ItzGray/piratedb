@@ -262,6 +262,8 @@ class Power:
                     for adjustment in adjustments:
                         try:
                             stat = STATS[adjustment["m_sStatName"]]
+                            # Fix for Energizing Brew
+                            assert self.template_id != 1707639
                         except:
                             if adjustment.type_hash == djb2("class ValueAdjustment") and adjustment["m_eOperator"] == 0 and buff_operator == "Multiply Add":
                                 value = (adjustment["m_fValue"] * 100) - 100
