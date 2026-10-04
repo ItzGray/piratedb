@@ -129,9 +129,19 @@ class RankTooltipLangKey:
         if self.id is None:
             return
 
-class OtherLangKey:
-    def __init__(self, cache: LangCache, text: bytes):
-        key = text
+class FactionLangKey:
+    def __init__(self, cache: LangCache, obj: dict):
+        key = obj["m_factionDisplayName"]
+        if key == b"":
+            self.id = None
+            return
+
+        self.id = cache.find_entry(key)
+        if self.id is None:
+            return
+
+class CustomLangKey:
+    def __init__(self, cache: LangCache, key: bytes):
         if key == b"":
             self.id = None
             return

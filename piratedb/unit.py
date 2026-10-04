@@ -86,12 +86,10 @@ class Unit:
             self.has_power_behavior = True
         self.vdf = ""
         self.vdf_type = ""
-        self.fallback_icon = ""
         if visual_behavior != None:
             if visual_behavior["m_sVisualDefinitionFile"] != b"":
                 self.vdf = visual_behavior["m_sVisualDefinitionFile"].decode("utf-8")
                 self.image = visual_behavior["m_sVisualDefinitionFile"].split(b"/")[-1]
-                self.fallback_icon = obj["m_sIcon"][0].decode("utf-8")
                 self.vdf_type = "VDF"
             else:
                 try:
@@ -114,7 +112,6 @@ class Unit:
         self.damage_type = STATS[unit_behavior["m_nDamageType"]]
         self.primary_stat = unit_behavior["m_nPrimaryStat"]
         self.primary_attack = unit_behavior["m_nPrimaryAttack"]
-        self.is_random_name = not bool(unit_behavior["m_nameOverride"].decode("utf-8"))
         self.stat_modifiers = []
         self.stat_modifier_values = []
         self.stat_modifier_operators = []

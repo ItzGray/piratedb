@@ -45,22 +45,22 @@ STATS = [
     "Epic Talent Slots",
     "Knockout Duration",
     "Task Duration",
-    "Ship Acceleration",
+    "Acceleration",
     "Ship Minimum Speed",
-    "Ship Maximum Speed",
-    "Ship Turning Speed",
-    "Ship Fuel Rate",
-    "Ship Boost Speed",
+    "Maximum Speed",
+    "Turning Speed",
+    "Boost Fuel Efficiency",
+    "Boost Speed",
     "Ship Boost Turn Speed",
-    "Ship Max Health",
+    "Max Hull Integrity",
     "Ship Current Health",
-    "Ship Repair Rate",
+    "Hull Repair Rate",
     "Ship Firing Rate",
     "Ship Damage",
-    "Ship Armor",
+    "Hull Armor",
     "Ship Accuracy",
-    "Ship Maneuver",
-    "Ship Max Fuel",
+    "Defense",
+    "Max Boost Fuel Capacity",
     "Ship Current Fuel",
     "Pet Guts",
     "Pet Guile",
@@ -100,7 +100,6 @@ TYPES = ROOT / "types.json"
 
 de = BinDeserializer(ROOT_WAD, TYPES)
 MANIFEST = de.deserialize_from_path("TemplateManifest.xml")
-CHARACTER_NAMES = de.deserialize_from_path("CharacterNames.xml")
 
 def get_curve_class(id: str, curves: list) -> str:
     for curve in curves:
