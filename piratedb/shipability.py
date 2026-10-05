@@ -27,4 +27,5 @@ class ShipAbility:
         self.description = state.make_desc_lang_key(obj)
         self.close_accuracy = obj["m_nCloseAccuracy"]
         self.long_accuracy = obj["m_nLongAccuracy"]
+        self.cooldown = obj["m_cooldown"] / 1000
         impacts = obj["m_impacts"]

@@ -383,6 +383,7 @@ CREATE TABLE ship_abilities (
     description        integer,
     close_accuracy     integer,
     long_accuracy      integer,
+    cooldown           integer,
 
     foreign key(name)   references locale_en(id)
 );
@@ -1183,11 +1184,12 @@ def insert_ship_abilities(cursor, ship_abilities):
             ability.image,
             ability.description.id,
             ability.close_accuracy,
-            ability.long_accuracy
+            ability.long_accuracy,
+            ability.cooldown
         ))
     
     cursor.executemany(
-        """INSERT INTO ship_abilities(id,name,real_name,image,description,close_accuracy,long_accuracy) VALUES (?,?,?,?,?,?,?)""",
+        """INSERT INTO ship_abilities(id,name,real_name,image,description,close_accuracy,long_accuracy,cooldown) VALUES (?,?,?,?,?,?,?,?)""",
         values
     )
 

@@ -99,14 +99,14 @@ def deserialize_files(state: State):
         
         if is_ship_template(obj):
             ship = Ship(state, obj)
-            if ship.vdf != "" and (ship.vdf_type, ship.vdf) not in vdfs:
-                vdfs.append((ship.vdf_type, ship.vdf))
+            if ship.vdf != "" and (ship.vdf_type, ship.vdf, "") not in vdfs:
+                vdfs.append((ship.vdf_type, ship.vdf, ""))
             ships.append(ship)
         
         if is_ship_item_template(obj):
             ship_item = ShipItem(state, obj)
-            if ship_item.vdf != "" and (ship_item.vdf_type, ship_item.vdf) not in vdfs:
-                vdfs.append((ship_item.vdf_type, ship_item.vdf))
+            if ship_item.vdf != "" and (ship_item.vdf_type, ship_item.vdf, "") not in vdfs:
+                vdfs.append((ship_item.vdf_type, ship_item.vdf, ""))
             ship_items.append(ship_item)
     
     for file in state.de.archive.iter_glob("BroadsidePowers/*.xml"):
@@ -114,8 +114,8 @@ def deserialize_files(state: State):
 
         if is_ship_ability_template(obj):
             ship_ability = ShipAbility(state, obj)
-            if ship_ability.image != "" and ("Image", ship_ability.vdf) not in vdfs:
-                vdfs.append(("Image", ship_ability.vdf))
+            if ship_ability.image != "" and ("Image", ship_ability.vdf, "") not in vdfs:
+                vdfs.append(("Image", ship_ability.vdf, ""))
             ship_abilities.append(ship_ability)
 
     for file in state.de.archive.iter_glob("Talents/*.xml"):
