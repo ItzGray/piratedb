@@ -53,6 +53,20 @@ CREATE TABLE factions (
     no_random_names    integer
 );
 
+CREATE TABLE rosters (
+    id                 integer not null primary key,
+    real_name          text
+);
+
+CREATE TABLE roster_units (
+    id                 integer not null primary key,
+    roster             integer not null,
+
+    unit               integer,
+
+    foreign key(roster)   references rosters(id)
+);
+
 CREATE TABLE items (
     id                 integer not null primary key,
     name               integer,
@@ -299,6 +313,81 @@ CREATE TABLE indiv_pet_powers (
 
 CREATE INDEX indiv_pet_power_lookup ON indiv_pet_powers(pet);
 
+CREATE TABLE ships (
+    id                 integer not null primary key,
+    name               integer,
+    real_name          text,
+    image              text,
+    title              integer,
+
+    ship_origin        text,
+    equip_level        integer,
+    equip_naut_level   integer,
+    ship_class         integer,
+    unsinkable         integer,
+
+    foreign key(name)   references locale_en(id)
+);
+
+CREATE TABLE ship_default_powers (
+    id       integer not null primary key,
+    ship     integer not null,
+
+    power    integer,
+
+    foreign key(ship)   references ships(id)
+);
+
+CREATE TABLE ship_units (
+    id       integer not null primary key,
+    ship     integer not null,
+
+    type     text,
+    unit     integer,
+
+    foreign key(ship)   references ships(id)
+);
+
+CREATE TABLE ship_items (
+    id                 integer not null primary key,
+    name               integer,
+    real_name          text,
+    image              text,
+
+    item_type          text,
+    item_flags         integer,
+    equip_origin       text,
+    equip_level        integer,
+    equip_naut_level   integer,
+
+    foreign key(name)   references locale_en(id)
+);
+
+CREATE TABLE ship_item_stats (
+    id       integer not null primary key,
+    item     integer not null,
+
+    type     text,
+    stat     integer,
+    amount   integer,
+
+    foreign key(item)   references ship_items(id)
+);
+
+CREATE TABLE ship_abilities (
+    id                 integer not null primary key,
+    name               integer,
+    real_name          text,
+    image              text,
+    
+    description        integer,
+    close_accuracy     integer,
+    long_accuracy      integer,
+    cooldown           integer,
+
+    foreign key(name)   references locale_en(id)
+);
+
 CREATE TABLE vdfs (
     id      integer not null primary key,
     type    text,
@@ -313,13 +402,14 @@ def _progress(_status, remaining, total):
     print(f'Copied {total-remaining} of {total} pages...')
 
 
-def build_db(state, curves, factions, items, units, pets, talents, powers, pet_talents, pet_powers, vdfs, out):
+def build_db(state, curves, rosters, factions, items, units, pets, talents, powers, pet_talents, pet_powers, ships, ship_items, ship_abilities, vdfs, out):
     mem = sqlite3.connect(":memory:")
     cursor = mem.cursor()
 
     initialize(cursor)
     insert_locale_data(cursor, state.cache)
     insert_curves(cursor, curves)
+    insert_rosters(cursor, rosters)
     insert_factions(cursor, factions)
     insert_items(cursor, items)
     insert_units(cursor, units)
@@ -328,6 +418,9 @@ def build_db(state, curves, factions, items, units, pets, talents, powers, pet_t
     insert_powers(cursor, powers)
     insert_pet_talents(cursor, pet_talents)
     insert_pet_powers(cursor, pet_powers)
+    insert_ships(cursor, ships)
+    insert_ship_items(cursor, ship_items)
+    insert_ship_abilities(cursor, ship_abilities)
     insert_vdfs(cursor, vdfs)
     mem.commit()
 
@@ -411,6 +504,32 @@ def insert_curves(cursor, curves):
     cursor.executemany(
         """INSERT INTO curve_abilities(curve,ability,ability_type,level,source) VALUES (?,?,?,?,?)""",
         abilities
+    )
+
+def insert_rosters(cursor, rosters):
+    values = []
+    units = []
+
+    for roster in rosters:
+        values.append((
+            roster.template_id,
+            roster.real_name
+        ))
+
+        for unit in roster.units:
+            units.append((
+                roster.template_id,
+                unit
+            ))
+    
+    cursor.executemany(
+        """INSERT INTO rosters(id,real_name) VALUES (?,?)""",
+        values
+    )
+
+    cursor.executemany(
+        """INSERT INTO roster_units(roster,unit) VALUES (?,?)""",
+        units
     )
 
 def insert_factions(cursor, factions):
@@ -955,6 +1074,122 @@ def insert_pet_powers(cursor, pet_powers):
 
     cursor.executemany(
         "INSERT INTO pet_powers(id,name,real_name,image,is_grant,rarity,power) VALUES (?,?,?,?,?,?,?)",
+        values
+    )
+
+def insert_ships(cursor, ships):
+    values = []
+    powers = []
+    units = []
+
+    for ship in ships:
+        values.append((
+            ship.template_id,
+            ship.name.id,
+            ship.real_name,
+            ship.image,
+            ship.title.id,
+            ship.faction,
+            ship.level_req,
+            ship.naut_lvl_req,
+            ship.ship_class,
+            ship.unsinkable
+        ))
+
+        for power in ship.auto_powers:
+            powers.append((
+                ship.template_id,
+                power
+            ))
+        
+        for roster in ship.rosters:
+            units.append((
+                ship.template_id,
+                "Roster",
+                roster
+            ))
+        
+        for unit in ship.extra_units:
+            units.append((
+                ship.template_id,
+                "Unit",
+                unit
+            ))
+    
+    cursor.executemany(
+        "INSERT INTO ships(id,name,real_name,image,title,ship_origin,equip_level,equip_naut_level,ship_class,unsinkable) VALUES (?,?,?,?,?,?,?,?,?,?)",
+        values
+    )
+    
+    cursor.executemany(
+        """INSERT INTO ship_default_powers(ship,power) VALUES (?,?)""",
+        powers
+    )
+
+    cursor.executemany(
+        """INSERT INTO ship_units(ship,type,unit) VALUES (?,?,?)""",
+        units
+    )
+
+def insert_ship_items(cursor, ship_items):
+    values = []
+    stats = []
+
+    for item in ship_items:
+        values.append((
+            item.template_id,
+            item.name.id,
+            item.real_name,
+            item.image,
+            item.item_type,
+            item.item_flags,
+            item.origin_req,
+            item.level_req,
+            item.naut_lvl_req
+        ))
+
+        for stat in range(len(item.stat_effects)):
+            stats.append((
+                item.template_id,
+                "Stat",
+                item.stat_effects[stat],
+                item.stat_effect_nums[stat]
+            ))
+        
+        for power in range(len(item.power_list)):
+            stats.append((
+                item.template_id,
+                "Power",
+                item.power_list[power],
+                1
+            ))
+    
+    cursor.executemany(
+        """INSERT INTO ship_items(id,name,real_name,image,item_type,item_flags,equip_origin,equip_level,equip_naut_level) VALUES (?,?,?,?,?,?,?,?,?)""",
+        values
+    )
+    cursor.executemany(
+        """INSERT INTO ship_item_stats(item,type,stat,amount) VALUES (?,?,?,?)""",
+        stats
+    )
+
+def insert_ship_abilities(cursor, ship_abilities):
+    values = []
+
+    for ability in ship_abilities:
+        values.append((
+            ability.template_id,
+            ability.name.id,
+            ability.real_name,
+            ability.image,
+            ability.description.id,
+            ability.close_accuracy,
+            ability.long_accuracy,
+            ability.cooldown
+        ))
+    
+    cursor.executemany(
+        """INSERT INTO ship_abilities(id,name,real_name,image,description,close_accuracy,long_accuracy,cooldown) VALUES (?,?,?,?,?,?,?,?)""",
         values
     )
 

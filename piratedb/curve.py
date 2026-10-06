@@ -24,6 +24,14 @@ CURVE_STATS = [
     "Spell Power",
     "Talent Slots",
     "Epic Talent Slots",
+    "Max Hull Integrity",
+    "Hull Repair Rate",
+    "Ship Damage",
+    "Ship Accuracy",
+    "Defense",
+    "Boost Fuel Efficiency",
+    "Max Boost Fuel Capacity",
+    "Ship Armor",
 ]
 
 CURVE_CLASSES = {
